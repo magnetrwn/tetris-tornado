@@ -2,8 +2,11 @@
 
 /* --- public --- */
 
-WorldMgr::bodyid_t WorldMgr::add(const BodyInit init, const BodyType type, const bodyid_t want) {
-    bodyid_t id = newId(want);
+WorldMgr::BodyId WorldMgr::add(const BodyInit init, const BodyType type, const ssize_t tetrIdx, const BodyId want) {
+    if (tetrIdx >= static_cast<ssize_t>(Tetromino::TETROMINO_COUNT))
+        throw std::runtime_error("add: Invalid tetromino index.");
+
+    BodyId id = newId(want);
 
     b2BodyDef bodyDef;
     bodyDef.type = (type == BodyType::STATIC) ? b2_staticBody : b2_dynamicBody;
@@ -13,21 +16,75 @@ WorldMgr::bodyid_t WorldMgr::add(const BodyInit init, const BodyType type, const
 
     b2Body* body = world.CreateBody(&bodyDef);
 
-    b2PolygonShape shape;
-    shape.SetAsBox(init.w * UNIT / 2.0f, init.h * UNIT / 2.0f);
+    const float blockWidth = init.w * UNIT;
+    const float blockHeight = init.h * UNIT;
 
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &shape;
-    fixtureDef.density = init.density;
-    fixtureDef.friction = init.friction;
-    fixtureDef.restitution = init.restitution;
-    body->CreateFixture(&fixtureDef);
+    float centroidX = 0.0f;
+    float centroidY = 0.0f;
 
-    bodyMap[id] = { .body = body, .details = init };
+    if (tetrIdx < 0) {
+
+        b2PolygonShape shape;
+        shape.SetAsBox(blockWidth / 2.0f, blockHeight / 2.0f);
+
+        b2FixtureDef fixtureDef;
+        fixtureDef.shape = &shape;
+        fixtureDef.density = init.density;
+        fixtureDef.friction = init.friction;
+        fixtureDef.restitution = init.restitution;
+        body->CreateFixture(&fixtureDef);
+
+    } else {
+
+        const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[tetrIdx];
+
+        const float blockWidth = init.w * UNIT;
+        const float blockHeight = init.h * UNIT;
+
+        size_t count = 0;
+
+        for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
+            for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
+                if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
+                    centroidX += i * blockWidth;
+                    centroidY += j * blockHeight;
+                    ++count;
+                }
+
+        if (count > 0) {
+            centroidX /= count;
+            centroidY /= count;
+        }
+
+        bodyDef.position.Set(init.x * UNIT - centroidX, init.y * UNIT - centroidY);
+
+        for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
+            for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
+                if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
+                    b2PolygonShape blockShape;
+                    blockShape.SetAsBox(
+                        blockWidth / 2.0f, 
+                        blockHeight / 2.0f, 
+                        { (i * blockWidth) - centroidX, (j * blockHeight) - centroidY }, 
+                        0.0f
+                    );
+
+                    b2FixtureDef fixtureDef;
+                    fixtureDef.shape = &blockShape;
+                    fixtureDef.density = init.density;
+                    fixtureDef.friction = init.friction;
+                    fixtureDef.restitution = init.restitution;
+
+                    body->CreateFixture(&fixtureDef);
+                }
+    }
+
+    bodyMap[id] = { .body = body, .tetromino = tetrIdx, .details = init, .centroid = { centroidX, centroidY } };
     return id;
 }
 
-void WorldMgr::remove(const bodyid_t id) {
+
+void WorldMgr::remove(const BodyId id) {
     if (bodyMap.find(id) == bodyMap.end())
         throw std::runtime_error("remove: Body identifier not found.");
 
@@ -45,28 +102,51 @@ void WorldMgr::update(const float dt) {
 }
 
 void WorldMgr::draw() const {
-    for (const std::pair<const bodyid_t, Body>& entry : bodyMap) {
+    for (const std::pair<const BodyId, Body>& entry : bodyMap) {
         b2Vec2 position = entry.second.body->GetPosition();
         float angle = entry.second.body->GetAngle() * RAD2DEG;
 
-        Rectangle rec = {
-            position.x / UNIT - (entry.second.details.w / 2.0f) * UNIT,
-            position.y / UNIT - (entry.second.details.h / 2.0f) * UNIT,
-            entry.second.details.w,
-            entry.second.details.h
-        };
+        if (entry.second.tetromino < 0) {
 
-        Vector2 origin = {
-            (entry.second.details.w / 2.0f),
-            (entry.second.details.h / 2.0f)
-        };
+            Rectangle rec = {
+                position.x / UNIT - (entry.second.details.w / 2.0f) * UNIT,
+                position.y / UNIT - (entry.second.details.h / 2.0f) * UNIT,
+                entry.second.details.w,
+                entry.second.details.h
+            };
 
-        DrawRectanglePro(rec, origin, angle, WHITE);
+            Vector2 origin = {
+                (entry.second.details.w / 2.0f),
+                (entry.second.details.h / 2.0f)
+            };
+
+            DrawRectanglePro(rec, origin, angle, WHITE);
+
+        } else {
+
+            const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[entry.second.tetromino];
+
+            const float blockWidth = entry.second.details.w * UNIT;
+            const float blockHeight = entry.second.details.h * UNIT;
+
+            for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
+                for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
+                    if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
+                        Rectangle rec = {
+                            position.x + entry.second.centroid.x + (i * blockWidth) - blockWidth / 2.0f,
+                            position.y + entry.second.centroid.y + (j * blockHeight) - blockHeight / 2.0f,
+                            blockWidth,
+                            blockHeight
+                        };
+
+                        DrawRectanglePro(rec, { blockWidth / 2.0f, blockHeight / 2.0f }, angle, WHITE);
+                    }
+        }
     }
 }
 
 void WorldMgr::prune(const float radius, const float x, const float y) {
-    for (std::unordered_map<bodyid_t, Body>::iterator it = bodyMap.begin(); it != bodyMap.end(); ) {
+    for (std::unordered_map<BodyId, Body>::iterator it = bodyMap.begin(); it != bodyMap.end(); ) {
         b2Vec2 position = it->second.body->GetPosition();
         position.x -= x * UNIT;
         position.y -= y * UNIT;
@@ -82,7 +162,7 @@ void WorldMgr::prune(const float radius, const float x, const float y) {
 }
 
 void WorldMgr::clear() {
-    for (const std::pair<const bodyid_t, Body>& entry : bodyMap)
+    for (const std::pair<const BodyId, Body>& entry : bodyMap)
         world.DestroyBody(entry.second.body);
 
     bodyMap.clear();
@@ -90,7 +170,7 @@ void WorldMgr::clear() {
 
 /* --- private --- */
 
-WorldMgr::bodyid_t WorldMgr::newId(bodyid_t want) {
+WorldMgr::BodyId WorldMgr::newId(BodyId want) {
     if (want < -1)
         throw std::runtime_error("newId: Invalid body identifier.");
 
@@ -101,7 +181,7 @@ WorldMgr::bodyid_t WorldMgr::newId(bodyid_t want) {
     } 
     
     if (!freedIds.empty()) {
-        bodyid_t id = *freedIds.begin();
+        BodyId id = *freedIds.begin();
         freedIds.erase(freedIds.begin());
         return id;
     }

@@ -29,27 +29,27 @@ int main(void) {
     WorldMgr worldMgr(world);
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF, SCR_HEIGHT - 30.0f, 100.0f, 20.0f),
+        WorldMgr::BodyInit(SCR_W_HALF, SCR_HEIGHT - 30.0f, 500.0f, 20.0f),
         WorldMgr::BodyType::STATIC
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF - 120.0f, SCR_HEIGHT - 100.0f, 20.0f, 80.0f),
+        WorldMgr::BodyInit(SCR_W_HALF - 120.0f, SCR_HEIGHT - 500.0f, 20.0f, 80.0f),
         WorldMgr::BodyType::STATIC
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF + 120.0f, SCR_HEIGHT - 100.0f, 20.0f, 80.0f),
+        WorldMgr::BodyInit(SCR_W_HALF + 120.0f, SCR_HEIGHT - 500.0f, 20.0f, 80.0f),
         WorldMgr::BodyType::STATIC
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF - 80.0f, SCR_HEIGHT - 50.0f, 100.0f, 20.0f, 30.0f),
+        WorldMgr::BodyInit(SCR_W_HALF - 80.0f, SCR_HEIGHT - 250.0f, 100.0f, 20.0f, 30.0f),
         WorldMgr::BodyType::STATIC
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF + 80.0f, SCR_HEIGHT - 50.0f, 100.0f, 20.0f, -30.0f),
+        WorldMgr::BodyInit(SCR_W_HALF + 80.0f, SCR_HEIGHT - 250.0f, 100.0f, 20.0f, -30.0f),
         WorldMgr::BodyType::STATIC
     );    
 
@@ -68,11 +68,12 @@ int main(void) {
 
             worldMgr.prune(SCR_H_HALF + 64.0f, SCR_W_HALF, SCR_H_HALF);    
 
-            if (GetTime() - lastTime >= 0.125f) {
+            if (GetTime() - lastTime >= 1.0f) {
                 lastTime = GetTime();
                 worldMgr.add(
-                    WorldMgr::BodyInit(SCR_W_HALF + spawnAt, rndUnit * 110.0f, 15.0f, 15.0f, rndUnit * 90.0f),
-                    WorldMgr::BodyType::DYNAMIC
+                    WorldMgr::BodyInit(SCR_W_HALF + spawnAt, rndUnit * 110.0f, 25.0f, 25.0f, rndUnit * 90.0f),
+                    WorldMgr::BodyType::DYNAMIC,
+                    0
                 );
                 spawnAt += 10.0f;
                 if (spawnAt > 50.0f) spawnAt = -50.0f;
