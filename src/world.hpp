@@ -4,10 +4,10 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <set>
-#include <cstdint>
-
+#include <cstddef>
 #include "box2d/box2d.h"
 #include "raylib.h"
+#include "tetromino.hpp"
 
 class WorldMgr {
 public:
@@ -32,10 +32,10 @@ public:
         float restitution;
 
         BodyInit(
-            float x = 0.0f, 
-            float y = 0.0f, 
-            float w = 0.0f, 
-            float h = 0.0f, 
+            float x = 0.0f,
+            float y = 0.0f,
+            float w = 0.0f,
+            float h = 0.0f,
             float angle = DEF_ANGLE, 
             float density = DEF_DENSITY, 
             float friction = DEF_FRICTION, 
@@ -51,15 +51,17 @@ public:
     bodyid_t add(const BodyInit init, const BodyType type, const bodyid_t want = -1);
     void remove(const bodyid_t id);
     size_t count() const;
-    void update();
+    void update(const float dt);
     void draw() const;
     void prune(const float radius, const float x = 0.0f, const float y = 0.0f);
     void clear();
 
+    bodyid_t addTetromino(const Tetromino& tetromino, const BodyInit init, const BodyType type, const bodyid_t want = -1);
+
     WorldMgr(b2World& world) : world(world) {}
     ~WorldMgr() { clear(); }
 
-protected:
+private:
     bodyid_t newId(bodyid_t want = -1);
 
     b2World& world;

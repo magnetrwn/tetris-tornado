@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ProjectName VERSION 0.0.1 LANGUAGES CXX)
+project(TomatoTornado VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,6 +8,10 @@ add_compile_options(-Wall -Wextra)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(main "${SOURCES}")
+
+# Change to compile with different defaults.
+#add_definitions(-DFPS=120)
+add_definitions(-DVSYNC)
 
 if(TARGET_PLATFORM STREQUAL "windows")
     # For Windows

@@ -40,38 +40,33 @@ size_t WorldMgr::count() const {
     return bodyMap.size();
 }
 
-void WorldMgr::update() {
-    world.Step(0.01667f, 6, 2);
+void WorldMgr::update(const float dt) {
+    world.Step(dt, 6, 2);
 }
 
 void WorldMgr::draw() const {
-    BeginDrawing();
-        ClearBackground({ 53, 53, 53, 255 });
+    for (const std::pair<const bodyid_t, Body>& entry : bodyMap) {
+        b2Vec2 position = entry.second.body->GetPosition();
+        float angle = entry.second.body->GetAngle() * RAD2DEG;
 
-        for (const std::pair<const bodyid_t, Body>& entry : bodyMap) {
-            b2Vec2 position = entry.second.body->GetPosition();
-            float angle = entry.second.body->GetAngle() * RAD2DEG;
+        Rectangle rec = {
+            position.x / UNIT - (entry.second.details.w / 2.0f) * UNIT,
+            position.y / UNIT - (entry.second.details.h / 2.0f) * UNIT,
+            entry.second.details.w,
+            entry.second.details.h
+        };
 
-            Rectangle rec = {
-                position.x / UNIT - (entry.second.details.w / 2.0f) * UNIT,
-                position.y / UNIT - (entry.second.details.h / 2.0f) * UNIT,
-                entry.second.details.w,
-                entry.second.details.h
-            };
+        Vector2 origin = {
+            (entry.second.details.w / 2.0f),
+            (entry.second.details.h / 2.0f)
+        };
 
-            Vector2 origin = {
-                (entry.second.details.w / 2.0f),
-                (entry.second.details.h / 2.0f)
-            };
-
-            DrawRectanglePro(rec, origin, angle, WHITE);
-        }
-
-    EndDrawing();
+        DrawRectanglePro(rec, origin, angle, WHITE);
+    }
 }
 
 void WorldMgr::prune(const float radius, const float x, const float y) {
-    for (std::unordered_map<bodyid_t, Body>::iterator it = bodyMap.begin(); it != bodyMap.end();) {
+    for (std::unordered_map<bodyid_t, Body>::iterator it = bodyMap.begin(); it != bodyMap.end(); ) {
         b2Vec2 position = it->second.body->GetPosition();
         position.x -= x * UNIT;
         position.y -= y * UNIT;
@@ -82,7 +77,7 @@ void WorldMgr::prune(const float radius, const float x, const float y) {
             it = bodyMap.erase(it);
         } 
         
-        else it++;
+        else ++it;
     }
 }
 
@@ -93,7 +88,7 @@ void WorldMgr::clear() {
     bodyMap.clear();
 }
 
-/* --- protected --- */
+/* --- private --- */
 
 WorldMgr::bodyid_t WorldMgr::newId(bodyid_t want) {
     if (want < -1)
