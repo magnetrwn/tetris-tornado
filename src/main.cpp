@@ -73,7 +73,7 @@ int main(void) {
                 worldMgr.add(
                     WorldMgr::BodyInit(SCR_W_HALF + spawnAt, rndUnit * 110.0f, 25.0f, 25.0f, rndUnit * 90.0f),
                     WorldMgr::BodyType::DYNAMIC,
-                    0
+                    6
                 );
                 spawnAt += 10.0f;
                 if (spawnAt > 50.0f) spawnAt = -50.0f;

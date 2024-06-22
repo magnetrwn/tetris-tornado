@@ -109,37 +109,29 @@ void WorldMgr::draw() const {
         if (entry.second.tetromino < 0) {
 
             Rectangle rec = {
-                position.x / UNIT - (entry.second.details.w / 2.0f) * UNIT,
-                position.y / UNIT - (entry.second.details.h / 2.0f) * UNIT,
+                position.x / UNIT,
+                position.y / UNIT,
                 entry.second.details.w,
                 entry.second.details.h
             };
 
-            Vector2 origin = {
-                (entry.second.details.w / 2.0f),
-                (entry.second.details.h / 2.0f)
-            };
-
-            DrawRectanglePro(rec, origin, angle, WHITE);
+            DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, angle, WHITE);
 
         } else {
 
             const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[entry.second.tetromino];
 
-            const float blockWidth = entry.second.details.w * UNIT;
-            const float blockHeight = entry.second.details.h * UNIT;
-
             for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
                 for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
                     if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
                         Rectangle rec = {
-                            position.x + entry.second.centroid.x + (i * blockWidth) - blockWidth / 2.0f,
-                            position.y + entry.second.centroid.y + (j * blockHeight) - blockHeight / 2.0f,
-                            blockWidth,
-                            blockHeight
+                            position.x / UNIT + (i * entry.second.details.w) - entry.second.centroid.x,
+                            position.y / UNIT + (j * entry.second.details.h) - entry.second.centroid.y,
+                            entry.second.details.w,
+                            entry.second.details.h
                         };
 
-                        DrawRectanglePro(rec, { blockWidth / 2.0f, blockHeight / 2.0f }, angle, WHITE);
+                        DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, angle, WHITE);
                     }
         }
     }
