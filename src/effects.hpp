@@ -2,7 +2,7 @@
 #define EFFECTS_H_
 
 #include <cmath>
-#include <cstddef>
+#include <sys/types.h>
 #include <vector>
 #include "raylib.h"
 

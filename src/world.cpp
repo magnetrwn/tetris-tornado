@@ -19,13 +19,13 @@ WorldMgr::BodyId WorldMgr::add(const BodyInit init, const BodyType type, const s
     const float blockWidth = init.w * UNIT;
     const float blockHeight = init.h * UNIT;
 
-    float centroidX = 0.0f;
-    float centroidY = 0.0f;
-
     if (tetrIdx < 0) {
 
         b2PolygonShape shape;
-        shape.SetAsBox(blockWidth / 2.0f, blockHeight / 2.0f);
+        shape.SetAsBox(
+            blockWidth / 2.0f, 
+            blockHeight / 2.0f
+        );
 
         b2FixtureDef fixtureDef;
         fixtureDef.shape = &shape;
@@ -37,49 +37,30 @@ WorldMgr::BodyId WorldMgr::add(const BodyInit init, const BodyType type, const s
     } else {
 
         const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[tetrIdx];
+        const Vector2 centroid = Tetromino::getCentroid(shapeArray, blockWidth, blockHeight);
 
-        const float blockWidth = init.w * UNIT;
-        const float blockHeight = init.h * UNIT;
+        bodyDef.position.Set(init.x * UNIT - centroid.x, init.y * UNIT - centroid.y);
 
-        size_t count = 0;
+        for (const Vector2& square : Tetromino::getSquares(shapeArray, blockWidth, blockHeight)) {
+            b2PolygonShape blockShape;
+            blockShape.SetAsBox(
+                blockWidth / 2.0f, 
+                blockHeight / 2.0f, 
+                { square.x - centroid.x, square.y - centroid.y }, 
+                0.0f
+            );
 
-        for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
-            for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
-                if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
-                    centroidX += i * blockWidth;
-                    centroidY += j * blockHeight;
-                    ++count;
-                }
+            b2FixtureDef fixtureDef;
+            fixtureDef.shape = &blockShape;
+            fixtureDef.density = init.density;
+            fixtureDef.friction = init.friction;
+            fixtureDef.restitution = init.restitution;
 
-        if (count > 0) {
-            centroidX /= count;
-            centroidY /= count;
+            body->CreateFixture(&fixtureDef);
         }
-
-        bodyDef.position.Set(init.x * UNIT - centroidX, init.y * UNIT - centroidY);
-
-        for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
-            for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
-                if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
-                    b2PolygonShape blockShape;
-                    blockShape.SetAsBox(
-                        blockWidth / 2.0f, 
-                        blockHeight / 2.0f, 
-                        { (i * blockWidth) - centroidX, (j * blockHeight) - centroidY }, 
-                        0.0f
-                    );
-
-                    b2FixtureDef fixtureDef;
-                    fixtureDef.shape = &blockShape;
-                    fixtureDef.density = init.density;
-                    fixtureDef.friction = init.friction;
-                    fixtureDef.restitution = init.restitution;
-
-                    body->CreateFixture(&fixtureDef);
-                }
     }
 
-    bodyMap[id] = { .body = body, .tetromino = tetrIdx, .details = init, .centroid = { centroidX, centroidY } };
+    bodyMap[id] = { .body = body, .tetromino = tetrIdx, .details = init };
     return id;
 }
 
@@ -122,32 +103,32 @@ void WorldMgr::draw() const {
         } else {
 
             const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[entry.second.tetromino];
-            const Vector2 centroid = { 
-                position.x / UNIT + entry.second.centroid.x / UNIT, 
-                position.y / UNIT + entry.second.centroid.y / UNIT
-            };
+            const Vector2 centroid = Tetromino::getCentroid(shapeArray, entry.second.details.w, entry.second.details.h);
 
-            for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
-                for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
-                    if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
-                        Vector2 sqOffset = {
-                            position.x / UNIT + (i * entry.second.details.w) - entry.second.centroid.x,
-                            position.y / UNIT + (j * entry.second.details.h) - entry.second.centroid.y
-                        };
+            for (Vector2& square : Tetromino::getSquares(shapeArray, entry.second.details.w, entry.second.details.h)) {
+                MathUtils::rot2D(square, centroid, rad);
 
-                        MathUtils::rot2D(sqOffset, centroid, rad);
-
-                        Rectangle rec = {
-                            sqOffset.x,
-                            sqOffset.y,
-                            entry.second.details.w,
-                            entry.second.details.h
-                        };
-
-                        DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE);
-                        //DrawCircle(centroid.x, centroid.y, 3.0f, RED);
-                        //DrawCircle(rec.x, rec.y, 3.0f,BLUE);
-                    }
+                DrawRectanglePro(
+                    { 
+                        position.x / UNIT + square.x - centroid.x,
+                        position.y / UNIT + square.y - centroid.y,
+                        entry.second.details.w, 
+                        entry.second.details.h
+                    }, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE
+                );
+                    /*DrawCircle(position.x / UNIT + square.x, position.y / UNIT + square.y, 3.0f, BLUE);
+                    DrawCircle(position.x / UNIT + centroid.x, position.y / UNIT + centroid.y, 3.0f, RED);
+                    for (const b2Fixture* fixture = entry.second.body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
+                        const b2PolygonShape* shape = static_cast<const b2PolygonShape*>(fixture->GetShape());
+                        for (int i = 0; i < 4; ++i)
+                            DrawCircle(
+                                position.x / UNIT + shape->m_vertices[i].x / UNIT,
+                                position.y / UNIT + shape->m_vertices[i].y / UNIT,
+                                3.0f,
+                                GREEN
+                            );
+                    }*/
+                }
         }
     }
 }

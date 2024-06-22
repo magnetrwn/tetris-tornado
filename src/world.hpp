@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <set>
-#include <cstddef>
+#include <sys/types.h>
 #include "box2d/box2d.h"
 #include "raylib.h"
 #include "tetromino.hpp"
@@ -13,6 +13,7 @@
 class WorldMgr {
 public:
     using BodyId = ssize_t;
+    using TetrId = ssize_t;
     constexpr static float UNIT = 0.04f; // 1 px = 0.04 m (so that args for box2d turn 1 px to 0.04 meters)
 
     enum class BodyType {
@@ -46,12 +47,11 @@ public:
 
     struct Body {
         b2Body* body;
-        ssize_t tetromino;
+        TetrId tetromino;
         BodyInit details;
-        Vector2 centroid;
     };
 
-    BodyId add(const BodyInit init, const BodyType type, const ssize_t tetrIdx = -1, const BodyId want = -1);
+    BodyId add(const BodyInit init, const BodyType type, const TetrId tetrIdx = -1, const BodyId want = -1);
     void remove(const BodyId id);
     size_t count() const;
     void update(const float dt);
@@ -59,7 +59,8 @@ public:
     void prune(const float radius, const float x = 0.0f, const float y = 0.0f);
     void clear();
 
-    BodyId addTetromino(const Tetromino& tetromino, const BodyInit init, const BodyType type, const BodyId want = -1);
+    //BodyId addRectangle(const BodyInit init, const BodyType type, const BodyId want = -1);
+    //BodyId addTetromino(const Tetromino& tetromino, const BodyInit init, const BodyType type, const BodyId want = -1);
 
     WorldMgr(b2World& world) : world(world) {}
     ~WorldMgr() { clear(); }

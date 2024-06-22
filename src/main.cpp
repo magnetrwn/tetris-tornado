@@ -1,4 +1,4 @@
-#include <cstddef>
+#include <sys/types.h>
 
 #include "box2d/box2d.h"
 #include "raylib.h"
@@ -66,14 +66,14 @@ int main(void) {
 
             ClearBackground({ 53, 53, 53, 255 });
 
-            worldMgr.prune(SCR_H_HALF + 64.0f, SCR_W_HALF, SCR_H_HALF);    
+            worldMgr.prune(SCR_H_HALF + 275.0f, SCR_W_HALF, SCR_H_HALF);    
 
             if (GetTime() - lastTime >= 1.0f) {
                 lastTime = GetTime();
                 worldMgr.add(
                     WorldMgr::BodyInit(SCR_W_HALF + spawnAt, rndUnit * 110.0f, 25.0f, 25.0f, rndUnit * 90.0f),
                     WorldMgr::BodyType::DYNAMIC,
-                    6
+                    GetRandomValue(-1, Tetromino::TETROMINO_COUNT - 1)
                 );
                 spawnAt += 10.0f;
                 if (spawnAt > 50.0f) spawnAt = -50.0f;
