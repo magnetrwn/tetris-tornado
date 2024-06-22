@@ -6,17 +6,19 @@
 
 class MathUtils {
 public:
-    inline static Vector2 rot2D(Vector2 point, Vector2 origin, float rad) {
+    inline static void rot2D(Vector2& point, const Vector2& origin, const float rad) {
         const float s = std::sin(rad);
         const float c = std::cos(rad);
+
+        Vector2 result = point;
 
         point.x -= origin.x;
         point.y -= origin.y;
 
-        point.x = point.x * c - point.y * s + origin.x;
-        point.y = point.x * s + point.y * c + origin.y;
-        
-        return point;
+        result.x = point.x * c - point.y * s + origin.x;
+        result.y = point.x * s + point.y * c + origin.y;
+
+        point = result;
     }
 };
 

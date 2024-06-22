@@ -34,12 +34,12 @@ int main(void) {
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF - 120.0f, SCR_HEIGHT - 500.0f, 20.0f, 80.0f),
+        WorldMgr::BodyInit(SCR_W_HALF - 120.0f, SCR_HEIGHT - 380.0f, 20.0f, 240.0f),
         WorldMgr::BodyType::STATIC
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF + 120.0f, SCR_HEIGHT - 500.0f, 20.0f, 80.0f),
+        WorldMgr::BodyInit(SCR_W_HALF + 120.0f, SCR_HEIGHT - 380.0f, 20.0f, 240.0f),
         WorldMgr::BodyType::STATIC
     );
 

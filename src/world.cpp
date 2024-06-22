@@ -103,8 +103,10 @@ void WorldMgr::update(const float dt) {
 
 void WorldMgr::draw() const {
     for (const std::pair<const BodyId, Body>& entry : bodyMap) {
-        b2Vec2 position = entry.second.body->GetPosition();
-        float angle = entry.second.body->GetAngle() * RAD2DEG;
+        
+        const b2Vec2 position = entry.second.body->GetPosition();
+        const float rad = entry.second.body->GetAngle();
+        const float deg = rad * RAD2DEG;
 
         if (entry.second.tetromino < 0) {
 
@@ -115,23 +117,36 @@ void WorldMgr::draw() const {
                 entry.second.details.h
             };
 
-            DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, angle, WHITE);
+            DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE);
 
         } else {
 
             const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[entry.second.tetromino];
+            const Vector2 centroid = { 
+                position.x / UNIT + entry.second.centroid.x / UNIT, 
+                position.y / UNIT + entry.second.centroid.y / UNIT
+            };
 
             for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
                 for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
                     if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
-                        Rectangle rec = {
+                        Vector2 sqOffset = {
                             position.x / UNIT + (i * entry.second.details.w) - entry.second.centroid.x,
-                            position.y / UNIT + (j * entry.second.details.h) - entry.second.centroid.y,
+                            position.y / UNIT + (j * entry.second.details.h) - entry.second.centroid.y
+                        };
+
+                        MathUtils::rot2D(sqOffset, centroid, rad);
+
+                        Rectangle rec = {
+                            sqOffset.x,
+                            sqOffset.y,
                             entry.second.details.w,
                             entry.second.details.h
                         };
 
-                        DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, angle, WHITE);
+                        DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE);
+                        //DrawCircle(centroid.x, centroid.y, 3.0f, RED);
+                        //DrawCircle(rec.x, rec.y, 3.0f,BLUE);
                     }
         }
     }
