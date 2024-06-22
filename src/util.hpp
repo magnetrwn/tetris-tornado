@@ -20,6 +20,11 @@ public:
 
         point = result;
     }
+
+    // NOTE: use between 0.0f and 1.0f by passing a ratio of the start to the end.
+    inline static float quadraticEase(const float t) {
+        return -2.0f * t * t + 2.0f * t + 0.025f;
+    }
 };
 
 #endif

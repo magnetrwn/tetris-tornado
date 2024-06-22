@@ -17,10 +17,11 @@ public:
     void set(const TetrId tetrIdx);
     void draw() const;
 
-private:
+private: // TODO: wait for the last drop to be asleep before allowing a new tetromino
     TetrId heldTetr;
-    Vector2 position;
+    Vector2 position; // TODO: limit to certain height and above
     Vector2 size;
+    float deg;
 };
 
 #endif

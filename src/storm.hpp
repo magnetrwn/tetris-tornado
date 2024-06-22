@@ -1,5 +1,5 @@
-#ifndef EFFECTS_H_
-#define EFFECTS_H_
+#ifndef STORM_H_
+#define STORM_H_
 
 #include <cmath>
 #include <sys/types.h>

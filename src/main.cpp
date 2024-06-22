@@ -4,7 +4,8 @@
 #include "raylib.h"
 
 #include "world.hpp"
-#include "effects.hpp"
+#include "storm.hpp"
+#include "wind.hpp"
 
 int main(void) {
     constexpr static float SCR_WIDTH = 600.0f;
@@ -34,28 +35,20 @@ int main(void) {
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF - 120.0f, SCR_HEIGHT - 380.0f, 20.0f, 240.0f),
+        WorldMgr::BodyInit(SCR_W_HALF + 250.0f, SCR_HEIGHT - 50.0f, 20.0f, 60.0f),
         WorldMgr::BodyType::STATIC
     );
 
     worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF + 120.0f, SCR_HEIGHT - 380.0f, 20.0f, 240.0f),
+        WorldMgr::BodyInit(SCR_W_HALF - 250.0f, SCR_HEIGHT - 50.0f, 20.0f, 60.0f),
         WorldMgr::BodyType::STATIC
     );
-
-    worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF - 80.0f, SCR_HEIGHT - 250.0f, 100.0f, 20.0f, 30.0f),
-        WorldMgr::BodyType::STATIC
-    );
-
-    worldMgr.add(
-        WorldMgr::BodyInit(SCR_W_HALF + 80.0f, SCR_HEIGHT - 250.0f, 100.0f, 20.0f, -30.0f),
-        WorldMgr::BodyType::STATIC
-    );    
 
     double lastTime = GetTime();
     double updateCloudsTime = GetTime();
-    float spawnAt = -50.0f;
+    double changeWindTime = GetTime();
+    float newTime = 0.0f;
+    WindEffectMgr wind;
 
     StormEffectMgr storm(SCR_WIDTH, SCR_HEIGHT, 24, 80);
 
@@ -68,15 +61,20 @@ int main(void) {
 
             worldMgr.prune(SCR_H_HALF + 275.0f, SCR_W_HALF, SCR_H_HALF);    
 
-            if (GetTime() - lastTime >= 1.0f) {
+            if (GetTime() - lastTime >= 0.75f) {
                 lastTime = GetTime();
                 worldMgr.add(
-                    WorldMgr::BodyInit(SCR_W_HALF + spawnAt, rndUnit * 110.0f, 25.0f, 25.0f, rndUnit * 90.0f),
+                    WorldMgr::BodyInit(
+                        SCR_W_HALF + static_cast<float>(GetRandomValue(-200, 200)), 
+                        rndUnit * 110.0f, 
+                        25.0f, 
+                        25.0f, 
+                        rndUnit * 90.0f
+                    ),
                     WorldMgr::BodyType::DYNAMIC,
-                    GetRandomValue(-1, Tetromino::TETROMINO_COUNT - 1)
+                    GetRandomValue(-1, Tetromino::TETROMINO_COUNT - 1),
+                    { 103, 164, 249, static_cast<unsigned char>(GetRandomValue(192, 255)) }
                 );
-                spawnAt += 10.0f;
-                if (spawnAt > 50.0f) spawnAt = -50.0f;
             }
 
             worldMgr.update(GetFrameTime());
@@ -87,11 +85,20 @@ int main(void) {
                 storm.updateClouds();
             }
 
-            storm.updateDroplets(GetFrameTime(), 2.0f);
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)/*GetTime() - changeWindTime >= 3.0f*/) {
+                changeWindTime = GetTime();
+                newTime = rndUnit * 16.0f - 8.0f;
+                wind.setTargetWind(newTime);
+            }
+
+            wind.step();
+            storm.updateDroplets(GetFrameTime(), wind.getWind());
             storm.draw();
             
             DrawText(std::to_string(GetFPS()).c_str(), 10, 10, 30, RED);
-            DrawText(std::to_string(worldMgr.count()).c_str(), 10, 52, 30, RED);  
+            DrawText(std::to_string(worldMgr.count()).c_str(), 10, 52, 30, RED); 
+            DrawText(std::to_string(wind.getWind()).c_str(), 10, 94, 30, RED);
+            DrawText(std::to_string(newTime).c_str(), 10, 136, 30, LIME);
 
         EndDrawing();
     }

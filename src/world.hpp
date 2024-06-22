@@ -24,7 +24,7 @@ public:
     struct BodyInit {
         constexpr static float DEF_ANGLE = 0.0f;
         constexpr static float DEF_DENSITY = 1.0f;
-        constexpr static float DEF_FRICTION = 0.25f;
+        constexpr static float DEF_FRICTION = 0.45f;
         constexpr static float DEF_RESTITUTION = 0.1875f;
 
         float x, y, w, h;
@@ -48,10 +48,11 @@ public:
     struct Body {
         b2Body* body;
         TetrId tetromino;
+        Color color;
         BodyInit details;
     };
 
-    BodyId add(const BodyInit init, const BodyType type, const TetrId tetrIdx = -1, const BodyId want = -1);
+    BodyId add(const BodyInit init, const BodyType type, const TetrId tetrIdx = -1, const Color color = WHITE, const BodyId want = -1);
     void remove(const BodyId id);
     size_t count() const;
     void update(const float dt);

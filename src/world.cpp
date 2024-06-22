@@ -2,7 +2,7 @@
 
 /* --- public --- */
 
-WorldMgr::BodyId WorldMgr::add(const BodyInit init, const BodyType type, const ssize_t tetrIdx, const BodyId want) {
+WorldMgr::BodyId WorldMgr::add(const BodyInit init, const BodyType type, const ssize_t tetrIdx, const Color color, const BodyId want) {
     if (tetrIdx >= static_cast<ssize_t>(Tetromino::TETROMINO_COUNT))
         throw std::runtime_error("add: Invalid tetromino index.");
 
@@ -60,7 +60,7 @@ WorldMgr::BodyId WorldMgr::add(const BodyInit init, const BodyType type, const s
         }
     }
 
-    bodyMap[id] = { .body = body, .tetromino = tetrIdx, .details = init };
+    bodyMap[id] = { .body = body, .tetromino = tetrIdx, .color = color, .details = init };
     return id;
 }
 
@@ -84,51 +84,40 @@ void WorldMgr::update(const float dt) {
 
 void WorldMgr::draw() const {
     for (const std::pair<const BodyId, Body>& entry : bodyMap) {
+        const Body& identBody = entry.second;
         
-        const b2Vec2 position = entry.second.body->GetPosition();
-        const float rad = entry.second.body->GetAngle();
+        const b2Vec2 position = identBody.body->GetPosition();
+        const float rad = identBody.body->GetAngle();
         const float deg = rad * RAD2DEG;
 
-        if (entry.second.tetromino < 0) {
+        if (identBody.tetromino < 0) {
 
             Rectangle rec = {
                 position.x / UNIT,
                 position.y / UNIT,
-                entry.second.details.w,
-                entry.second.details.h
+                identBody.details.w,
+                identBody.details.h
             };
 
-            DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE);
+            DrawRectanglePro(rec, { identBody.details.w / 2.0f, identBody.details.h / 2.0f }, deg, identBody.color);
 
         } else {
 
-            const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[entry.second.tetromino];
-            const Vector2 centroid = Tetromino::getCentroid(shapeArray, entry.second.details.w, entry.second.details.h);
+            const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[identBody.tetromino];
+            const Vector2 centroid = Tetromino::getCentroid(shapeArray, identBody.details.w, identBody.details.h);
 
-            for (Vector2& square : Tetromino::getSquares(shapeArray, entry.second.details.w, entry.second.details.h)) {
+            for (Vector2& square : Tetromino::getSquares(shapeArray, identBody.details.w, identBody.details.h)) {
                 MathUtils::rot2D(square, centroid, rad);
+                square.x += position.x / UNIT - centroid.x;
+                square.y += position.y / UNIT - centroid.y;
 
                 DrawRectanglePro(
-                    { 
-                        position.x / UNIT + square.x - centroid.x,
-                        position.y / UNIT + square.y - centroid.y,
-                        entry.second.details.w, 
-                        entry.second.details.h
-                    }, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE
+                    { square.x, square.y, identBody.details.w, identBody.details.h }, 
+                    { identBody.details.w / 2.0f, identBody.details.h / 2.0f }, 
+                    deg, 
+                    identBody.color
                 );
-                    /*DrawCircle(position.x / UNIT + square.x, position.y / UNIT + square.y, 3.0f, BLUE);
-                    DrawCircle(position.x / UNIT + centroid.x, position.y / UNIT + centroid.y, 3.0f, RED);
-                    for (const b2Fixture* fixture = entry.second.body->GetFixtureList(); fixture; fixture = fixture->GetNext()) {
-                        const b2PolygonShape* shape = static_cast<const b2PolygonShape*>(fixture->GetShape());
-                        for (int i = 0; i < 4; ++i)
-                            DrawCircle(
-                                position.x / UNIT + shape->m_vertices[i].x / UNIT,
-                                position.y / UNIT + shape->m_vertices[i].y / UNIT,
-                                3.0f,
-                                GREEN
-                            );
-                    }*/
-                }
+            }
         }
     }
 }
