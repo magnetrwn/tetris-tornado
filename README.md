@@ -6,8 +6,8 @@
 
 If you want to build for your platform, do the following:
 
-+ `git clone https://github.com/magnetrwn/tomato-tornado`
-+ `cd tomato-tornado`
++ `git clone https://github.com/magnetrwn/Tomato-tornado`
++ `cd Tomato-tornado`
 + `./build.sh <platform> && build/main`
 
 Where `<platform>` is one of the following:
@@ -17,4 +17,4 @@ Where `<platform>` is one of the following:
 
 ## Gameplay
 
-You start at the base of a tower, which will support your objects. You get random pieces of tetrominoes to place and create your tower, with the goal to make it as stable as possible. The tower will have gusts of wind with increasing intensity, made of tomatoes, that will try to knock down your tower. The game ends when the tower falls.
+You start at the base of a tower, which will support your objects. You get random pieces of tetrominoes to place and create your tower, with the goal to make it as stable as possible. The tower will have gusts of wind with increasing intensity, made of Tomatoes, that will try to knock down your tower. The game ends when the tower falls.

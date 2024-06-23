@@ -17,9 +17,12 @@ Game::Game()
     playerCursorTimer = GetTime();
 
     cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
+
+    font = LoadFontEx("./static/font/ct_prolamina.ttf", 36, nullptr, 0);
 }
 
 Game::~Game() {
+    UnloadFont(font);
     CloseWindow();
 }
 
@@ -66,7 +69,8 @@ void Game::setupFloor() {
 }
 
 void Game::step(const float t, const float dt) {
-    world.prune(SCR_H_HALF + 275.0f, SCR_W_HALF, SCR_H_HALF);    
+    world.prune(SCR_H_HALF + 275.0f, SCR_W_HALF, SCR_H_HALF);
+    world.applyAll(wind.getWind() * WIND_FORCE, 0.0f);
     world.update(dt);
 
     if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
@@ -131,5 +135,16 @@ void Game::draw() const {
         cursor.draw();
         storm.draw();
         warning.draw();
+
+        std::string kgfText = std::to_string(wind.getWind() * WIND_FORCE * 0.1019f) + " kgf";
+        
+        DrawTextEx(
+            font, 
+            kgfText.c_str(), 
+            { SCR_W_HALF - MeasureTextEx(font, kgfText.c_str(), 36, 10).x / 2, 12 }, 
+            36, 
+            10, 
+            { 53, 53, 53, 127 }
+        );
     EndDrawing();
 }

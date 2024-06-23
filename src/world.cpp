@@ -145,6 +145,11 @@ void WorldMgr::clear() {
     bodyMap.clear();
 }
 
+void WorldMgr::applyAll(const float forceX, const float forceY) {
+    for (const std::pair<const BodyId, Body>& entry : bodyMap)
+        entry.second.body->ApplyForceToCenter({ forceX, forceY }, true);
+}
+
 /* --- private --- */
 
 WorldMgr::BodyId WorldMgr::newId(BodyId want) {

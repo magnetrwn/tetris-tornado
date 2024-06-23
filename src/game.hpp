@@ -1,6 +1,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <string>
 #include "world.hpp"
 #include "storm.hpp"
 #include "wind.hpp"
@@ -20,6 +21,9 @@ private:
     constexpr static float SCR_W_HALF = static_cast<float>(SCR_WIDTH) / 2.0f;
     constexpr static float SCR_H_HALF = static_cast<float>(SCR_HEIGHT) / 2.0f;
     constexpr static float TETROMINO_SIZE = 50.0f;
+    constexpr static float WIND_FORCE = 15.0f;
+
+    Font font;
 
     WorldMgr world;
     WindState wind;

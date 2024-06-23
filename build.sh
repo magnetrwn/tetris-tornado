@@ -19,4 +19,5 @@ fi
 cmake -S. -Bbuild -H. -DTARGET_PLATFORM="$1" $USE_MINGW_TOOLCHAIN
 cmake --build build
 
+cp -r static build
 cp build/compile_commands.json . || true

@@ -23,8 +23,8 @@ public:
 
     struct BodyInit {
         constexpr static float DEF_ANGLE = 0.0f;
-        constexpr static float DEF_DENSITY = 1.0f;
-        constexpr static float DEF_FRICTION = 0.45f;
+        constexpr static float DEF_DENSITY = 2.1f;
+        constexpr static float DEF_FRICTION = 0.7f;
         constexpr static float DEF_RESTITUTION = 0.1875f;
 
         float x, y, w, h;
@@ -60,8 +60,7 @@ public:
     void prune(const float radius, const float x = 0.0f, const float y = 0.0f);
     void clear();
 
-    //BodyId addRectangle(const BodyInit init, const BodyType type, const BodyId want = -1);
-    //BodyId addTetromino(const Tetromino& tetromino, const BodyInit init, const BodyType type, const BodyId want = -1);
+    void applyAll(const float forceX, const float forceY);
 
     WorldMgr(b2Vec2 worldSetup) : world(worldSetup) {}
     ~WorldMgr() { clear(); }
