@@ -26,7 +26,6 @@ public:
         return -2.0f * t * t + 2.0f * t + 0.025f;
     }
 
-    // NOTE: i know it's not the fastest, but it works
     inline static float randf(float lbound, float ubound) {
         static std::random_device rd;
         static std::mt19937 gen(rd());

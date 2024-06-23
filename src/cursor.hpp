@@ -8,7 +8,8 @@
 
 class PlayerCursor {
 public:
-    using TetrId = ssize_t;
+    using TetrId = Tetromino::TetrominoId;
+    
     struct CursorInfo {
         TetrId tetrIdx;
         Vector2 pos;

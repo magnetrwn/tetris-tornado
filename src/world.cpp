@@ -150,6 +150,17 @@ void WorldMgr::applyAll(const float forceX, const float forceY) {
         entry.second.body->ApplyForceToCenter({ forceX, forceY }, true);
 }
 
+bool WorldMgr::exists(const BodyId id) const {
+    return bodyMap.find(id) != bodyMap.end();
+}
+
+void WorldMgr::changeColor(const BodyId id, const Color color) {
+    if (bodyMap.find(id) == bodyMap.end())
+        throw std::runtime_error("changeColor: Body identifier not found.");
+
+    bodyMap[id].color = color;
+}
+
 /* --- private --- */
 
 WorldMgr::BodyId WorldMgr::newId(BodyId want) {

@@ -7,7 +7,8 @@ Game::Game()
       wind(),
       warning(SCR_WIDTH, SCR_HEIGHT),
       cursor(TETROMINO_SIZE, { 192, 216, 255, 127 }),
-      storm(SCR_WIDTH, SCR_HEIGHT, 24, 80) {
+      storm(SCR_WIDTH, SCR_HEIGHT, 24, 80),
+      score(0) {
 
     initWindow();
     setupFloor();
@@ -18,7 +19,7 @@ Game::Game()
 
     cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
 
-    font = LoadFontEx("./static/font/ct_prolamina.ttf", 36, nullptr, 0);
+    font = LoadFontEx("./static/font/ct_prolamina.ttf", 64, nullptr, 0);
 }
 
 Game::~Game() {
@@ -84,20 +85,22 @@ void Game::step(const float t, const float dt) {
         const PlayerCursor::CursorInfo info = cursor.get();
 
         if (info.tetrIdx != -1) {
-            world.add(
-                WorldMgr::BodyInit(
-                    info.pos.x, 
-                    info.pos.y, 
-                    TETROMINO_SIZE, 
-                    TETROMINO_SIZE,
-                    info.deg
-                ),
-                WorldMgr::BodyType::DYNAMIC,
-                info.tetrIdx,
-                { 103, 164, 249, static_cast<unsigned char>(MathUtils::randi(192, 255)) }
-            );
+            const BodyId id = 
+                world.add(
+                    WorldMgr::BodyInit(
+                        info.pos.x, 
+                        info.pos.y, 
+                        TETROMINO_SIZE, 
+                        TETROMINO_SIZE,
+                        info.deg
+                    ),
+                    WorldMgr::BodyType::DYNAMIC,
+                    info.tetrIdx,
+                    { 103, 164, 249, static_cast<unsigned char>(MathUtils::randi(192, 255)) }
+                );
 
             cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
+            awaitingEvaluationTimers.push_back({ id, 0.0f } );
         }
     }
 
@@ -123,6 +126,35 @@ void Game::step(const float t, const float dt) {
             warning.startWarning(WarningView::WarningDir::UP);
     }
 
+    for (size_t i = 0; i < awaitingEvaluationTimers.size(); ++i) {
+        std::pair<BodyId, double>& entry = awaitingEvaluationTimers[i];
+
+        if (!world.exists(entry.first)) {
+            awaitingEvaluationTimers.erase(awaitingEvaluationTimers.begin() + i);
+            continue;
+        }
+
+        entry.second += dt;
+
+        if (entry.second > AWAITING_EVAL_IVAL) {
+            world.changeColor(
+                entry.first, 
+                { 103, 164, 249, static_cast<unsigned char>(MathUtils::randi(192, 255)) }
+            );
+
+            awaitingEvaluationTimers.erase(awaitingEvaluationTimers.begin() + i);
+
+            if (world.count() - 4 /* current piece + static base pieces */ == score)
+                score++;
+
+        } else {
+            world.changeColor(
+                entry.first, 
+                (std::fmod(entry.second, 0.25f) < 0.125f) ? WHITE : Color{ 103, 164, 249, 208 }
+            );
+        }
+    }
+
     wind.step(dt);
     warning.step(dt);
     storm.updateDroplets(dt, wind.getWind());
@@ -137,6 +169,7 @@ void Game::draw() const {
         warning.draw();
 
         std::string kgfText = std::to_string(wind.getWind() * WIND_FORCE * 0.1019f) + " kgf";
+        std::string scoreText = std::to_string(score);
         
         DrawTextEx(
             font, 
@@ -145,6 +178,15 @@ void Game::draw() const {
             36, 
             10, 
             { 53, 53, 53, 127 }
+        );
+
+        DrawTextEx(
+            font, 
+            scoreText.c_str(), 
+            { SCR_W_HALF - MeasureTextEx(font, scoreText.c_str(), 48, 4).x / 2, SCR_HEIGHT - 100 }, 
+            48, 
+            4, 
+            WHITE
         );
     EndDrawing();
 }

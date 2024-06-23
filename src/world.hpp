@@ -13,7 +13,8 @@
 class WorldMgr {
 public:
     using BodyId = ssize_t;
-    using TetrId = ssize_t;
+    using TetrId = Tetromino::TetrominoId;
+
     constexpr static float UNIT = 0.04f; // 1 px = 0.04 m (so that args for box2d turn 1 px to 0.04 meters)
 
     enum class BodyType {
@@ -61,6 +62,9 @@ public:
     void clear();
 
     void applyAll(const float forceX, const float forceY);
+
+    bool exists(const BodyId id) const;
+    void changeColor(const BodyId id, const Color color);
 
     WorldMgr(b2Vec2 worldSetup) : world(worldSetup) {}
     ~WorldMgr() { clear(); }

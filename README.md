@@ -19,7 +19,7 @@ Where `<platform>` is one of the following:
 
 You start with a small base to drop tetrominoes on. During the game, there will be random gusts of wind, indicated by red arrows to prepare the player before they pick up speed. The player can then prepare for the pieces to be moved in the direction of the wind and adjust their strategy accordingly.
 
-The main objective of the game is to make as big of a tower as possible. The game is endless, with the score being the maximum number of pieces that have been kept (for a certain amount of time?)
+The main objective of the game is to make as big of a tower as possible. The game is **endless**, with the score being the maximum number of pieces that have been kept for a certain amount of time.
 
 ## Controls
 
@@ -34,7 +34,9 @@ If the tetromino has been placed, there will be a short delay before the next pi
 + [Raylib](https://www.raylib.com/)
 + [Box2D](https://box2d.org/)
 
-If you were looking for the cross-compilation toolchain, it's [here](https://github.com/mstorsjo/llvm-mingw). This project expands from a template wrapper I made around Raylib and Box2D, including the correct shared libraries to link against. If you are interested in where the compiled libraries come from please tell me.
+If you were looking for the cross-compilation toolchain, it's [this one](https://github.com/mstorsjo/llvm-mingw). This project expands from a template wrapper I made around Raylib and Box2D, including the correct static libraries to link against **on Windows**, that were built using the toolchain. If you are interested in where the compiled libraries come from please tell me.
+
+**Note:** on Linux the libraries are linked dynamically, so you will need to have them installed on your system! This way the final executable is smaller and easier to distribute.
 
 ## Bugs
 
