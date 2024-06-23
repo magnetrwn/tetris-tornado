@@ -63,6 +63,8 @@ private:
     size_t score;
 
     void initWindow();
+
+    constexpr static size_t FLOOR_COUNT = 3;
     void setupFloor();
 
     void step(const float t, const float dt);

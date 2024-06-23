@@ -144,7 +144,7 @@ void Game::step(const float t, const float dt) {
 
             awaitingEvaluationTimers.erase(awaitingEvaluationTimers.begin() + i);
 
-            if (world.count() - 4 /* current piece + static base pieces */ == score)
+            if (world.count() - awaitingEvaluationTimers.size() - FLOOR_COUNT == score + 1)
                 score++;
 
         } else {
