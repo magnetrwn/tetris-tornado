@@ -7,12 +7,14 @@
 #include "storm.hpp"
 #include "wind.hpp"
 #include "warning.hpp"
+#include "cursor.hpp"
 
 int main(void) {
     constexpr static float SCR_WIDTH = 600.0f;
     constexpr static float SCR_HEIGHT = 960.0f;
     constexpr static float SCR_W_HALF = static_cast<float>(SCR_WIDTH) / 2.0f;
     constexpr static float SCR_H_HALF = static_cast<float>(SCR_HEIGHT) / 2.0f;
+    constexpr static float TETROMINO_SIZE = 25.0f;
 
     #ifdef FPS
         SetTargetFPS(FPS);
@@ -52,8 +54,12 @@ int main(void) {
     WindState wind;
     double addWarningTime = GetTime();
     WarningView warning(SCR_WIDTH, SCR_HEIGHT);
+    PlayerCursor cursor(TETROMINO_SIZE);
+    float cursorAngle = 0.0f;
 
     StormView storm(SCR_WIDTH, SCR_HEIGHT, 24, 80);
+
+    cursor.set(6);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -70,8 +76,8 @@ int main(void) {
                     WorldMgr::BodyInit(
                         SCR_W_HALF + static_cast<float>(GetRandomValue(-200, 200)), 
                         rndUnit * 110.0f, 
-                        25.0f, 
-                        25.0f, 
+                        TETROMINO_SIZE, 
+                        TETROMINO_SIZE, // NOTE: technically rectangular built tetrominoes are supported
                         rndUnit * 90.0f
                     ),
                     WorldMgr::BodyType::DYNAMIC,
@@ -82,6 +88,10 @@ int main(void) {
 
             worldMgr.update(GetFrameTime());
             worldMgr.draw();
+
+            cursor.update(GetMousePosition(), cursorAngle);
+            if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+                cursorAngle += 2.5f + (cursorAngle > 360.0f ? -360.0f : 0.0f);
 
             if (GetTime() - updateCloudsTime >= 0.1f) {
                 updateCloudsTime = GetTime();
@@ -101,6 +111,7 @@ int main(void) {
             warning.step(GetFrameTime());
             storm.updateDroplets(GetFrameTime(), wind.getWind());
             storm.draw();
+            cursor.draw();
             warning.draw();
             
             DrawText(std::to_string(GetFPS()).c_str(), 10, 10, 30, RED);

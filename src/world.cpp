@@ -102,7 +102,7 @@ void WorldMgr::draw() const {
             DrawRectanglePro(rec, { identBody.details.w / 2.0f, identBody.details.h / 2.0f }, deg, identBody.color);
 
         } else {
-
+            // NOTE: possible code duplication in PlayerCursor
             const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[identBody.tetromino];
             const Vector2 centroid = Tetromino::getCentroid(shapeArray, identBody.details.w, identBody.details.h);
 

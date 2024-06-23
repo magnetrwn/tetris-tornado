@@ -2,41 +2,35 @@
 
 /* --- public --- */
 
-PlayerCursor::TetrId PlayerCursor::get() const {
-    return heldTetr;
+PlayerCursor::CursorInfo PlayerCursor::get() const {
+    return { heldTetr, position, deg };
 }
 
-void PlayerCursor::set(const TetrId tetrIdx) {
+void PlayerCursor::update(const Vector2& pos, const float deg) {
+    position = pos;
+    this->deg = deg;
+}
+
+void PlayerCursor::set(const TetrId tetrIdx, const Color color) {
     heldTetr = tetrIdx;
+    this->color = color;
 }
 
-/*void PlayerCursor::draw() const {
+void PlayerCursor::draw() const {
+    // NOTE: possible code duplication in WorldMgr
     const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[heldTetr];
-    
-    const Vector2 centroid = { 
-        position.x / WorldMgr::UNIT, 
-        position.y / WorldMgr::UNIT
-    };
+    const Vector2 centroid = Tetromino::getCentroid(shapeArray, PIECE_SIZE, PIECE_SIZE);
 
-    for (size_t i = 0; i < Tetromino::TETROMINO_DEFW; ++i)
-        for (size_t j = 0; j < Tetromino::TETROMINO_DEFH; ++j)
-            if (shapeArray[j * Tetromino::TETROMINO_DEFW + i]) {
-                Vector2 sqOffset = {
-                    position.x / WorldMgr::UNIT + i * entry.second.details.w,
-                    position.y / WorldMgr::UNIT + j * entry.second.details.h
-                };
+    for (Vector2& square : Tetromino::getSquares(shapeArray, PIECE_SIZE, PIECE_SIZE)) {
+        MathUtils::rot2D(square, centroid, deg * DEG2RAD);
+        square.x += position.x - centroid.x;
+        square.y += position.y - centroid.y;
 
-                MathUtils::rot2D(sqOffset, centroid, 0.0f);
-
-                Rectangle rec = {
-                    sqOffset.x,
-                    sqOffset.y,
-                    entry.second.details.w,
-                    entry.second.details.h
-                };
-
-                DrawRectanglePro(rec, { entry.second.details.w / 2.0f, entry.second.details.h / 2.0f }, deg, WHITE);
-                DrawCircle(centroid.x, centroid.y, 3.0f, RED);
-                DrawCircle(rec.x, rec.y, 3.0f, BLUE);
-            }
-}*/
+        DrawRectanglePro(
+            { square.x, square.y, PIECE_SIZE, PIECE_SIZE }, 
+            { PIECE_SIZE / 2.0f, PIECE_SIZE / 2.0f }, 
+            deg, 
+            color
+        );
+    }
+}
