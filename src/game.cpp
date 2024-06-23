@@ -16,7 +16,7 @@ Game::Game()
     newWaveTimer = GetTime();
     playerCursorTimer = GetTime();
 
-    cursor.set(GetRandomValue(0, Tetromino::TETROMINO_COUNT - 1));
+    cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
 }
 
 Game::~Game() {
@@ -90,10 +90,10 @@ void Game::step(const float t, const float dt) {
                 ),
                 WorldMgr::BodyType::DYNAMIC,
                 info.tetrIdx,
-                { 103, 164, 249, static_cast<unsigned char>(GetRandomValue(192, 255)) }
+                { 103, 164, 249, static_cast<unsigned char>(MathUtils::randi(192, 255)) }
             );
 
-            cursor.set(GetRandomValue(0, Tetromino::TETROMINO_COUNT - 1));
+            cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
         }
     }
 
@@ -109,7 +109,7 @@ void Game::step(const float t, const float dt) {
 
     if (isNewWaveTime(t)) {
         newWaveTimer = t;
-        const float newWind = static_cast<float>(GetRandomValue(-8, 8));
+        const float newWind = MathUtils::randf(-8.0f, 8.0f);
         wind.setTargetWind(newWind);
         if (newWind > 2.0f)
             warning.startWarning(WarningView::WarningDir::LEFT);

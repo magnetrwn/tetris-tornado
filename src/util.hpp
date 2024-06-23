@@ -2,6 +2,7 @@
 #define UTIL_H_
 
 #include <cmath>
+#include <random>
 #include "raylib.h"
 
 class MathUtils {
@@ -21,9 +22,22 @@ public:
         point = result;
     }
 
-    // NOTE: use between 0.0f and 1.0f by passing a ratio of the start to the end.
     inline static float quadraticEase(const float t) {
         return -2.0f * t * t + 2.0f * t + 0.025f;
+    }
+
+    inline static float randf(float lbound, float ubound) {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(lbound, ubound);
+        return dist(gen);
+    }
+
+    inline static int randi(int lbound, int ubound) {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_int_distribution<int> dist(lbound, ubound);
+        return dist(gen);
     }
 };
 

@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <vector>
 #include "raylib.h"
+#include "util.hpp"
 
 class StormView { // NOTE: includes the wind effect, but WindState is not included
 public:

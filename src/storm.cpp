@@ -1,5 +1,4 @@
 #include "storm.hpp"
-#include <string>
 
 /* --- initialization --- */
 
@@ -22,8 +21,8 @@ StormView::StormView(const float width, const float height, const size_t clouds,
 void StormView::updateClouds() {
     for (Cloud& cloud : clouds)
         for (Vector2& component : cloud.components) {
-            const float angle = GetRandomValue(0, 360) * DEG2RAD;
-            const float dist = GetRandomValue(0, static_cast<int>(CLOUDRADIUS));
+            const float angle = MathUtils::randf(0.0f, 360.0f) * DEG2RAD;
+            const float dist = MathUtils::randf(0.0f, CLOUDRADIUS);
             component = { cloud.position.x + std::cos(angle) * dist, cloud.position.y + std::sin(angle) * dist };
         }
 }
@@ -34,7 +33,7 @@ void StormView::updateDroplets(const float dt, const float wind) {
         droplet.y += WIND_EFFECT_Y * dt;
 
         if (droplet.y > HEIGHT) {
-            droplet.x = static_cast<float>(GetRandomValue(0, static_cast<int>(WIDTH)));
+            droplet.x = MathUtils::randf(0.0f, WIDTH);
             droplet.y = 0;
         }
 
@@ -59,8 +58,8 @@ void StormView::initClouds() {
 
     for (Cloud& cloud : clouds) {
         cloud.position = { 
-            static_cast<float>(GetRandomValue(CLOUDRADIUS, static_cast<int>(WIDTH) - CLOUDRADIUS)), 
-            static_cast<float>(GetRandomValue(CLOUDRADIUS / 2.0f, static_cast<int>(HEIGHT / CLOUDRADIUS / 5.0f))) 
+            MathUtils::randf(CLOUDRADIUS, WIDTH - CLOUDRADIUS), 
+            MathUtils::randf(CLOUDRADIUS / 2.0f, HEIGHT / CLOUDRADIUS / 5.0f)
         };
 
         cloud.components.resize(NCLOUDCIRCLES);
@@ -74,8 +73,8 @@ void StormView::initDroplets() {
 
     for (Vector2& droplet : droplets) {
         droplet = { 
-            static_cast<float>(GetRandomValue(0, static_cast<int>(WIDTH))), 
-            static_cast<float>(GetRandomValue(0, static_cast<int>(HEIGHT))) 
+            MathUtils::randf(0, WIDTH), 
+            MathUtils::randf(0, HEIGHT)
         };
     }
 }
