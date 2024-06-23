@@ -8,11 +8,12 @@ Game::Game()
       warning(SCR_WIDTH, SCR_HEIGHT),
       cursor(TETROMINO_SIZE, { 192, 216, 255, 127 }),
       storm(SCR_WIDTH, SCR_HEIGHT, 24, 80),
-      score(0) {
+      score(0), paused(false) {
 
     initWindow();
     setupFloor();
 
+    helpAtLaunchTimer = GetTime();
     updateCloudsTimer = GetTime();
     newWaveTimer = GetTime();
     playerCursorTimer = GetTime();
@@ -31,8 +32,33 @@ Game::~Game() {
 
 void Game::loop() {
     while (!WindowShouldClose()) {
-        step(GetTime(), GetFrameTime());
-        draw();
+        if (isShowHelpTime(GetTime() + 1.0f)) {
+
+            BeginDrawing();
+                drawHelp(255);
+            EndDrawing();
+
+        } else {
+
+            if (!IsWindowFocused())
+                paused = true;
+
+            if (IsKeyPressed(KEY_P))
+                paused = !paused;
+
+            if (!paused)
+                step(GetTime(), GetFrameTime());
+
+            BeginDrawing();
+                if (!paused)
+                    draw();
+                else
+                    pauseDo();
+
+                if ((HELP_AT_LAUNCH_IVAL - GetTime()) > 0.05f)
+                    drawHelp(255 * (HELP_AT_LAUNCH_IVAL - GetTime()));
+            EndDrawing();
+        }
     }
 }
 
@@ -161,32 +187,111 @@ void Game::step(const float t, const float dt) {
 }
 
 void Game::draw() const {
-    BeginDrawing();
-        ClearBackground({ 53, 53, 53, 255 });
-        world.draw();
-        cursor.draw();
-        storm.draw();
-        warning.draw();
+    ClearBackground({ 53, 53, 53, 255 });
+    world.draw();
+    cursor.draw();
+    storm.draw();
+    warning.draw();
 
-        std::string kgfText = std::to_string(wind.getWind() * WIND_FORCE * 0.1019f) + " kgf";
-        std::string scoreText = std::to_string(score);
-        
-        DrawTextEx(
-            font, 
-            kgfText.c_str(), 
-            { SCR_W_HALF - MeasureTextEx(font, kgfText.c_str(), 36, 10).x / 2, 12 }, 
-            36, 
-            10, 
-            { 53, 53, 53, 127 }
-        );
+    std::string kgfText = std::to_string(wind.getWind() * WIND_FORCE * 0.1019f) + " kgf";
+    std::string scoreText = std::to_string(score);
+    
+    DrawTextEx(
+        font, 
+        kgfText.c_str(), 
+        { SCR_W_HALF - MeasureTextEx(font, kgfText.c_str(), 36, 10).x / 2, 12 }, 
+        36, 
+        10, 
+        { 53, 53, 53, 127 }
+    );
 
-        DrawTextEx(
-            font, 
-            scoreText.c_str(), 
-            { SCR_W_HALF - MeasureTextEx(font, scoreText.c_str(), 48, 4).x / 2, SCR_HEIGHT - 100 }, 
-            48, 
-            4, 
-            WHITE
-        );
-    EndDrawing();
+    DrawTextEx(
+        font, 
+        scoreText.c_str(), 
+        { SCR_W_HALF - MeasureTextEx(font, scoreText.c_str(), 48, 4).x / 2, SCR_HEIGHT - 100 }, 
+        48, 
+        4, 
+        WHITE
+    );
+}
+
+void Game::drawHelp(const unsigned char alpha) const {
+    DrawRectangle( 0, 0, SCR_WIDTH, SCR_HEIGHT, { 0, 0, 0, alpha });
+
+    constexpr const char* strings[6] = {
+        "LMB: place tetromino,",
+        "RMB: rotate tetromino,",
+        "P: pause game,",
+        "The game is endless!",
+        "Your score:",
+        "0"
+    };
+
+    DrawTextEx(
+        font, 
+        strings[0], 
+        { SCR_W_HALF - MeasureTextEx(font, strings[0], 36, 2).x / 2, SCR_H_HALF - 96 }, 
+        36, 
+        2, 
+        { 255, 255, 255, alpha }
+    );
+
+    DrawTextEx(
+        font, 
+        strings[1], 
+        { SCR_W_HALF - MeasureTextEx(font, strings[1], 36, 2).x / 2, SCR_H_HALF - 32 }, 
+        36, 
+        2, 
+        { 255, 255, 255, alpha }
+    );
+
+    DrawTextEx(
+        font, 
+        strings[2], 
+        { SCR_W_HALF - MeasureTextEx(font, strings[2], 36, 2).x / 2, SCR_H_HALF + 32 }, 
+        36, 
+        2, 
+        { 255, 255, 255, alpha }
+    );
+
+    DrawTextEx(
+        font, 
+        strings[3], 
+        { SCR_W_HALF - MeasureTextEx(font, strings[3], 36, 2).x / 2, SCR_H_HALF + 96 }, 
+        36, 
+        2, 
+        { 255, 255, 255, alpha }
+    );
+
+    DrawTextEx(
+        font, 
+        strings[4], 
+        { 40, SCR_HEIGHT - 95 }, 
+        36, 
+        2, 
+        { 255, 255, 255, alpha }
+    );
+
+    DrawTextEx(
+        font, 
+        strings[5], 
+        { SCR_W_HALF - MeasureTextEx(font, strings[5], 48, 4).x / 2, SCR_HEIGHT - 100 }, 
+        48, 
+        4, 
+        { 255, 255, 255, alpha }
+    );
+}
+
+void Game::pauseDo() {
+    storm.updateDroplets(GetFrameTime(), wind.getWind());
+    draw();
+
+    DrawTextEx(
+        font, 
+        "PAUSED", 
+        { SCR_W_HALF - MeasureTextEx(font, "PAUSED", 64, 4).x / 2, SCR_H_HALF - 32 },
+        64, 
+        4, 
+        WHITE
+    );
 }

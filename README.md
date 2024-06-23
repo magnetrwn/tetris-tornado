@@ -26,6 +26,7 @@ The main objective of the game is to make as big of a tower as possible. The gam
 + Move the mouse to handle the placement cursor.
 + `LMB` to place the piece.
 + `RMB` to rotate the piece.
++ `P` to pause the game.
 
 If the tetromino has been placed, there will be a short delay before the next piece is allowed to be spawned, indicated by the cursor turning red.
 

@@ -17,7 +17,7 @@ public:
     StormView(const float width, const float height, const size_t clouds, const size_t droplets);
 
     void updateClouds();
-    void updateDroplets(const float dt, const float wind = 0.0f);
+    void updateDroplets(const float dt, const float wind);
     void draw() const;
 
 private:

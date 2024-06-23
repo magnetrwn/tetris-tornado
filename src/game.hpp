@@ -33,15 +33,21 @@ private:
     PlayerCursor cursor;
     StormView storm;
 
+    constexpr static double HELP_AT_LAUNCH_IVAL = 4.0f;
     constexpr static double UPDATE_CLOUDS_IVAL = 0.1f;
     constexpr static double NEW_WAVE_IVAL = 7.5f;
     constexpr static double PLAYER_CURSOR_IVAL = 1.0f;
     constexpr static double AWAITING_EVAL_IVAL = 5.0f;
 
+    double helpAtLaunchTimer;
     double updateCloudsTimer;
     double newWaveTimer;
     double playerCursorTimer;
     std::vector<std::pair<BodyId, double>> awaitingEvaluationTimers;
+
+    inline bool isShowHelpTime(const float t) const {
+        return t - helpAtLaunchTimer < HELP_AT_LAUNCH_IVAL;
+    }
 
     inline bool isUpdateCloudsTime(const float t) const {
         return t - updateCloudsTimer > UPDATE_CLOUDS_IVAL;
@@ -60,15 +66,18 @@ private:
         and t - awaitingEvaluationTimers.front().second > AWAITING_EVAL_IVAL;
     }
 
+    constexpr static size_t FLOOR_COUNT = 3;
+
     size_t score;
+    bool paused;
 
     void initWindow();
-
-    constexpr static size_t FLOOR_COUNT = 3;
     void setupFloor();
 
     void step(const float t, const float dt);
     void draw() const;
+    void drawHelp(const unsigned char alpha) const;
+    void pauseDo();
 };
 
 #endif
