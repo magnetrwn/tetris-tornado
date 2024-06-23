@@ -63,13 +63,13 @@ public:
     //BodyId addRectangle(const BodyInit init, const BodyType type, const BodyId want = -1);
     //BodyId addTetromino(const Tetromino& tetromino, const BodyInit init, const BodyType type, const BodyId want = -1);
 
-    WorldMgr(b2World& world) : world(world) {}
+    WorldMgr(b2Vec2 worldSetup) : world(worldSetup) {}
     ~WorldMgr() { clear(); }
 
 private:
     BodyId newId(BodyId want = -1);
 
-    b2World& world;
+    b2World world;
     std::unordered_map<BodyId, Body> bodyMap;
     std::set<BodyId> freedIds;
 };

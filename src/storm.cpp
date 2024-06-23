@@ -1,4 +1,5 @@
 #include "storm.hpp"
+#include <string>
 
 /* --- initialization --- */
 
@@ -30,7 +31,7 @@ void StormView::updateClouds() {
 void StormView::updateDroplets(const float dt, const float wind) {
     for (Vector2& droplet : droplets) {
         droplet.x += WIND_EFFECT_X * wind * dt;
-        droplet.y += (WIND_EFFECT_Y + droplet.y * 1.5f) * dt;
+        droplet.y += WIND_EFFECT_Y * dt;
 
         if (droplet.y > HEIGHT) {
             droplet.x = static_cast<float>(GetRandomValue(0, static_cast<int>(WIDTH)));

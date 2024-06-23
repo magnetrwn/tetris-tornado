@@ -6,14 +6,18 @@ PlayerCursor::CursorInfo PlayerCursor::get() const {
     return { heldTetr, position, deg };
 }
 
-void PlayerCursor::update(const Vector2& pos, const float deg) {
+void PlayerCursor::update(const Vector2& pos, const float degOffset) {
     position = pos;
-    this->deg = deg;
+    deg += degOffset;
+    deg = std::fmod(deg, 360.0f);
 }
 
-void PlayerCursor::set(const TetrId tetrIdx, const Color color) {
+void PlayerCursor::updateColor(const Color newColor) {
+    color = newColor;
+}
+
+void PlayerCursor::set(const TetrId tetrIdx) {
     heldTetr = tetrIdx;
-    this->color = color;
 }
 
 void PlayerCursor::draw() const {

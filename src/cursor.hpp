@@ -15,20 +15,20 @@ public:
         float deg;
     };
 
-    PlayerCursor(const float pieceSize)
-        : PIECE_SIZE(pieceSize), heldTetr(-1) {}
+    PlayerCursor(const float pieceSize, const Color color)
+        : PIECE_SIZE(pieceSize), heldTetr(-1), position({ 0.0f, 0.0f }), deg(0.0f), color(color) {}
 
     CursorInfo get() const;
-    void set(const TetrId tetrIdx, const Color color = WHITE);
-    void update(const Vector2& pos, const float deg);
+    void set(const TetrId tetrIdx);
+    void update(const Vector2& pos, const float degOffset = 0.0f);
+    void updateColor(const Color color);
     void draw() const;
 
-private: // TODO: wait for the last drop to be asleep before allowing a new tetromino
+private:
     const float PIECE_SIZE;
 
     TetrId heldTetr;
-    Vector2 position; // TODO: limit to certain height and above
-    Vector2 size;
+    Vector2 position;
     float deg;
     Color color;
 };
