@@ -48,7 +48,7 @@ void Game::initWindow() {
         SetConfigFlags(FLAG_VSYNC_HINT);
     #endif
 
-    InitWindow(SCR_WIDTH, SCR_HEIGHT, "Tomato Tornado: a game by @magnetrwn");
+    InitWindow(SCR_WIDTH, SCR_HEIGHT, "Tetris Tornado: a game by @magnetrwn");
 }
 
 void Game::setupFloor() {
