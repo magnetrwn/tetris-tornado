@@ -6,6 +6,7 @@
 #include "world.hpp"
 #include "storm.hpp"
 #include "wind.hpp"
+#include "warning.hpp"
 
 int main(void) {
     constexpr static float SCR_WIDTH = 600.0f;
@@ -48,9 +49,11 @@ int main(void) {
     double updateCloudsTime = GetTime();
     double changeWindTime = GetTime();
     float newTime = 0.0f;
-    WindEffectMgr wind;
+    WindState wind;
+    double addWarningTime = GetTime();
+    WarningView warning(SCR_WIDTH, SCR_HEIGHT);
 
-    StormEffectMgr storm(SCR_WIDTH, SCR_HEIGHT, 24, 80);
+    StormView storm(SCR_WIDTH, SCR_HEIGHT, 24, 80);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -85,15 +88,20 @@ int main(void) {
                 storm.updateClouds();
             }
 
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)/*GetTime() - changeWindTime >= 3.0f*/) {
+            if (GetTime() - changeWindTime >= 3.0f) {
                 changeWindTime = GetTime();
                 newTime = rndUnit * 16.0f - 8.0f;
                 wind.setTargetWind(newTime);
             }
 
-            wind.step();
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                warning.startWarning(static_cast<WarningView::WarningDir>(GetRandomValue(0, 2)));
+
+            wind.step(GetFrameTime());
+            warning.step(GetFrameTime());
             storm.updateDroplets(GetFrameTime(), wind.getWind());
             storm.draw();
+            warning.draw();
             
             DrawText(std::to_string(GetFPS()).c_str(), 10, 10, 30, RED);
             DrawText(std::to_string(worldMgr.count()).c_str(), 10, 52, 30, RED); 

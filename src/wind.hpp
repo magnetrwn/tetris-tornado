@@ -4,15 +4,15 @@
 #include <cmath>
 #include "util.hpp"
 
-class WindEffectMgr {
+class WindState {
 public:
-    WindEffectMgr(const float min = -8.0f, const float max = 8.0f, const float wind = 0.0f, const float step = 0.09f)
+    WindState(const float min = -8.0f, const float max = 8.0f, const float wind = 0.0f, const float step = 0.09f)
         : MINWIND(min), MAXWIND(max), currentWind(wind), targetWind(wind), targetStep(step), isChanging(false) {}
 
     void setTargetWind(const float wind);
     float getWind() const;
 
-    void step();
+    void step(const float dt);
 
 private:
     const float MINWIND;

@@ -6,14 +6,14 @@
 #include <vector>
 #include "raylib.h"
 
-class StormEffectMgr {
+class StormView { // NOTE: includes the wind effect, but WindState is not included
 public:
     struct Cloud {
         std::vector<Vector2> components;
         Vector2 position;
     };
 
-    StormEffectMgr(const float width, const float height, const size_t clouds, const size_t droplets);
+    StormView(const float width, const float height, const size_t clouds, const size_t droplets);
 
     void updateClouds();
     void updateDroplets(const float dt, const float wind = 0.0f);
@@ -30,6 +30,9 @@ private:
 
     const size_t NDROPLETS;
     std::vector<Vector2> droplets;
+
+    const float WIND_EFFECT_X;
+    const float WIND_EFFECT_Y;
 
     void initClouds();
     void initDroplets();

@@ -1,17 +1,17 @@
 #include "wind.hpp"
 
-void WindEffectMgr::setTargetWind(const float wind) {
+void WindState::setTargetWind(const float wind) {
     targetWind = std::fmin(std::fmax(wind, MINWIND), MAXWIND);
     isChanging = true;
     diff = std::abs(currentWind - targetWind);
     start = currentWind;
 }
 
-float WindEffectMgr::getWind() const {
+float WindState::getWind() const {
     return currentWind;
 }
 
-void WindEffectMgr::step() {
+void WindState::step(const float dt) {
     if (!isChanging)
         return;
 
@@ -22,6 +22,6 @@ void WindEffectMgr::step() {
     }
 
     const float completion = std::abs(currentWind - start) / diff;
-    currentWind += targetStep * MathUtils::quadraticEase(completion) * ((currentWind < targetWind) ? 1.0f : -1.0f);
+    currentWind += targetStep * MathUtils::quadraticEase(completion) * ((currentWind < targetWind) ? 1.0f : -1.0f) * dt / 0.016f;
 
 }
