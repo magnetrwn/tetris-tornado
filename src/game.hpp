@@ -25,8 +25,6 @@ private:
     constexpr static float TETROMINO_SIZE = 50.0f;
     constexpr static float WIND_FORCE = 15.0f;
 
-    Font font;
-
     WorldMgr world;
     WindState wind;
     WarningView warning;
@@ -68,6 +66,15 @@ private:
 
     constexpr static size_t FLOOR_COUNT = 3;
 
+    constexpr static size_t FONT_MAX = 160;
+    constexpr static size_t FONT_L = 64;
+    constexpr static size_t FONT_M = 48;
+    constexpr static size_t FONT_S = 32;
+
+    Font font;
+
+    void drawCenteredText(const char* text, const float y, const size_t size, const size_t spacing, const Color color) const;
+
     size_t score;
     bool paused;
 
@@ -76,6 +83,9 @@ private:
 
     void step(const float t, const float dt);
     void draw() const;
+
+    constexpr static float HELP_TEXT_INTERLINE = 120.0f;
+
     void drawHelp(const unsigned char alpha) const;
     void pauseDo();
 };

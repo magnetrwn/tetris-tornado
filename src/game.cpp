@@ -20,7 +20,7 @@ Game::Game()
 
     cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
 
-    font = LoadFontEx("./static/font/ct_prolamina.ttf", 64, nullptr, 0);
+    font = LoadFontEx("./static/font/m6x11.ttf", FONT_MAX, nullptr, 0);
 }
 
 Game::~Game() {
@@ -63,6 +63,17 @@ void Game::loop() {
 }
 
 /* --- private --- */
+
+void Game::drawCenteredText(const char* text, const float y, const size_t size, const size_t spacing, const Color color) const {
+    DrawTextEx(
+        font, 
+        text, 
+        { SCR_W_HALF - MeasureTextEx(font, text, size, spacing).x / 2, y }, 
+        size, 
+        spacing, 
+        color
+    );
+}
 
 void Game::initWindow() {
     #ifdef FPS
@@ -193,32 +204,46 @@ void Game::draw() const {
     storm.draw();
     warning.draw();
 
-    std::string kgfText = std::to_string(wind.getWind() * WIND_FORCE * 0.1019f) + " kgf";
+    const float w = wind.getWind();
+
+    // TODO: all under here is inefficient, should generate the new data only when the score/wind changes
+    // TODO: complexity is high, should be refactored into smaller functions
+
+    const unsigned char alpha = static_cast<unsigned char>(std::min(127, static_cast<int>(std::abs(w) * 200.0f)));
+
+    std::string kgfText = std::to_string(w * WIND_FORCE * 0.1019f) + " kgf";
     std::string scoreText = std::to_string(score);
     
-    DrawTextEx(
-        font, 
-        kgfText.c_str(), 
-        { SCR_W_HALF - MeasureTextEx(font, kgfText.c_str(), 36, 10).x / 2, 12 }, 
-        36, 
-        10, 
-        { 53, 53, 53, 127 }
+    drawCenteredText(kgfText.c_str(), 12, FONT_S, 10, { 53, 53, 53, 127 });
+    drawCenteredText(scoreText.c_str(), SCR_HEIGHT - 100, FONT_M, 4, WHITE);
+
+    DrawRectanglePro(
+        { SCR_W_HALF, 48, std::abs(w) * 50, 16 }, 
+        { std::abs(w) * 25, 0 }, 
+        0.0f, 
+        { 53, 53, 53, alpha }
     );
 
-    DrawTextEx(
-        font, 
-        scoreText.c_str(), 
-        { SCR_W_HALF - MeasureTextEx(font, scoreText.c_str(), 48, 4).x / 2, SCR_HEIGHT - 100 }, 
-        48, 
-        4, 
-        WHITE
-    );
+    if (w < 0.0f)
+        DrawTriangle(
+            { SCR_W_HALF + w * 25, 48 },
+            { SCR_W_HALF + w * 25 - 16, 56 },
+            { SCR_W_HALF + w * 25, 64 },
+            { 53, 53, 53, alpha }
+        );
+    else
+        DrawTriangle(
+            { SCR_W_HALF + w * 25 + 16, 56 },
+            { SCR_W_HALF + w * 25, 48 },
+            { SCR_W_HALF + w * 25, 64 },
+            { 53, 53, 53, alpha }
+        );
 }
 
 void Game::drawHelp(const unsigned char alpha) const {
     DrawRectangle( 0, 0, SCR_WIDTH, SCR_HEIGHT, { 0, 0, 0, alpha });
 
-    constexpr const char* strings[6] = {
+    constexpr static const char* HELP_STRINGS[6] = {
         "LMB: place tetromino,",
         "RMB: rotate tetromino,",
         "P: pause game,",
@@ -227,71 +252,15 @@ void Game::drawHelp(const unsigned char alpha) const {
         "0"
     };
 
-    DrawTextEx(
-        font, 
-        strings[0], 
-        { SCR_W_HALF - MeasureTextEx(font, strings[0], 36, 2).x / 2, SCR_H_HALF - 96 }, 
-        36, 
-        2, 
-        { 255, 255, 255, alpha }
-    );
+    for (size_t i = 0; i < 4; ++i)
+        drawCenteredText(HELP_STRINGS[i], SCR_H_HALF - HELP_TEXT_INTERLINE * 1.5f + HELP_TEXT_INTERLINE * i, FONT_S, 2, { 255, 255, 255, alpha });
 
-    DrawTextEx(
-        font, 
-        strings[1], 
-        { SCR_W_HALF - MeasureTextEx(font, strings[1], 36, 2).x / 2, SCR_H_HALF - 32 }, 
-        36, 
-        2, 
-        { 255, 255, 255, alpha }
-    );
-
-    DrawTextEx(
-        font, 
-        strings[2], 
-        { SCR_W_HALF - MeasureTextEx(font, strings[2], 36, 2).x / 2, SCR_H_HALF + 32 }, 
-        36, 
-        2, 
-        { 255, 255, 255, alpha }
-    );
-
-    DrawTextEx(
-        font, 
-        strings[3], 
-        { SCR_W_HALF - MeasureTextEx(font, strings[3], 36, 2).x / 2, SCR_H_HALF + 96 }, 
-        36, 
-        2, 
-        { 255, 255, 255, alpha }
-    );
-
-    DrawTextEx(
-        font, 
-        strings[4], 
-        { 40, SCR_HEIGHT - 95 }, 
-        36, 
-        2, 
-        { 255, 255, 255, alpha }
-    );
-
-    DrawTextEx(
-        font, 
-        strings[5], 
-        { SCR_W_HALF - MeasureTextEx(font, strings[5], 48, 4).x / 2, SCR_HEIGHT - 100 }, 
-        48, 
-        4, 
-        { 255, 255, 255, alpha }
-    );
+    DrawTextEx(font, HELP_STRINGS[4], { SCR_W_HALF - 220, SCR_HEIGHT - 95 }, FONT_S, 2, { 255, 255, 255, alpha });
+    drawCenteredText(HELP_STRINGS[5], SCR_HEIGHT - 100, FONT_M, 4, { 255, 255, 255, alpha });
 }
 
 void Game::pauseDo() {
     storm.updateDroplets(GetFrameTime(), wind.getWind());
     draw();
-
-    DrawTextEx(
-        font, 
-        "PAUSED", 
-        { SCR_W_HALF - MeasureTextEx(font, "PAUSED", 64, 4).x / 2, SCR_H_HALF - 32 },
-        64, 
-        4, 
-        WHITE
-    );
+    drawCenteredText("PAUSED", SCR_H_HALF - 32, FONT_L, 4, WHITE);
 }
