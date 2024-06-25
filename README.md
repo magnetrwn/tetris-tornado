@@ -2,13 +2,18 @@
 
 **A game for the Lazy Dev 2024 Summer Jam.**
 
+![Gameplay Sample GIF](media/gameplay_sample_sm.gif)
+
 ## Quick Start
 
-If you want to build for your platform, do the following:
+You can download the latest release from **[here](https://github.com/magnetrwn/tetris-tornado/releases/latest)**.
 
-+ `git clone https://github.com/magnetrwn/Tetris-tornado`
-+ `cd Tetris-tornado`
-+ `./build.sh <platform> && build/main` (Linux)
+Otherwise, if you want to build for your platform, do the following:
+
++ `git clone https://github.com/magnetrwn/tetris-tornado`
++ `cd tetris-tornado`
++ `./build.sh <platform>`
++ get the distributable zip in the `dist/` folder
 
 Where `<platform>` is one of the following:
 
@@ -47,3 +52,10 @@ If you were looking for the cross-compilation toolchain, it's [this one](https:/
 ## License
 
 This simple game is licensed under the BSD 3-Clause License. See the [LICENSE](LICENSE) file for more information.
+
+Asset licenses are located at each asset folder and are not included in the game's license. Their credits are as well.
+
+## Screenshots
+
+![Game Screenshot](media/screenshot_game.png)
+![Start Screenshot](media/screenshot_start.png)

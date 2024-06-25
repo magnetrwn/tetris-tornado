@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-Wall -Wextra)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(main "${SOURCES}")
+add_executable(tornado "${SOURCES}")
 
 # Change to compile with different defaults.
 #add_definitions(-DFPS=120)
@@ -20,11 +20,11 @@ if(TARGET_PLATFORM STREQUAL "windows")
 
     include_directories("${EXT_INCL_PATH}")
     link_directories("${EXT_LIB_PATH}")
-    target_link_libraries(main PRIVATE winmm "${EXT_LIB_PATH}/libraylib.a" "${EXT_LIB_PATH}/libbox2d.a")
+    target_link_libraries(tornado PRIVATE winmm "${EXT_LIB_PATH}/libraylib.a" "${EXT_LIB_PATH}/libbox2d.a")
 
 elseif(TARGET_PLATFORM STREQUAL "linux")
     # For Linux
-    target_link_libraries(main PRIVATE raylib box2d)
+    target_link_libraries(tornado PRIVATE raylib box2d)
 
 else()
     message(FATAL_ERROR "Unknown target platform")
