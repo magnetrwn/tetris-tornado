@@ -3,13 +3,17 @@
 /* --- public --- */
 
 PlayerCursor::CursorInfo PlayerCursor::get() const {
-    return { heldTetr, position, deg };
+    return cur;
 }
 
 void PlayerCursor::update(const Vector2& pos, const float degOffset) {
-    position = pos;
-    deg += degOffset;
-    deg = std::fmod(deg, 360.0f);
+    cur.pos = pos;
+    cur.deg += degOffset;
+    cur.deg = std::fmod(cur.deg, 360.0f);
+}
+
+void PlayerCursor::updateSize(const float sizeOffset) {
+    cur.size = std::fmin(std::fmax(cur.size + sizeOffset, PIECE_MIN), PIECE_MAX);
 }
 
 void PlayerCursor::updateColor(const Color newColor) {
@@ -17,23 +21,23 @@ void PlayerCursor::updateColor(const Color newColor) {
 }
 
 void PlayerCursor::set(const TetrId tetrIdx) {
-    heldTetr = tetrIdx;
+    cur.tetrIdx = tetrIdx;
 }
 
 void PlayerCursor::draw() const {
     // NOTE: possible code duplication in WorldMgr
-    const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[heldTetr];
-    const Vector2 centroid = Tetromino::getCentroid(shapeArray, PIECE_SIZE, PIECE_SIZE);
+    const Tetromino::TetrominoArray& shapeArray = Tetromino::SHAPES[cur.tetrIdx];
+    const Vector2 centroid = Tetromino::getCentroid(shapeArray, cur.size, cur.size);
 
-    for (Vector2& square : Tetromino::getSquares(shapeArray, PIECE_SIZE, PIECE_SIZE)) {
-        MathUtils::rot2D(square, centroid, deg * DEG2RAD);
-        square.x += position.x - centroid.x;
-        square.y += position.y - centroid.y;
+    for (Vector2& square : Tetromino::getSquares(shapeArray, cur.size, cur.size)) {
+        MathUtils::rot2D(square, centroid, cur.deg * DEG2RAD);
+        square.x += cur.pos.x - centroid.x;
+        square.y += cur.pos.y - centroid.y;
 
         DrawRectanglePro(
-            { square.x, square.y, PIECE_SIZE, PIECE_SIZE }, 
-            { PIECE_SIZE / 2.0f, PIECE_SIZE / 2.0f }, 
-            deg, 
+            { square.x, square.y, cur.size, cur.size }, 
+            { cur.size / 2.0f, cur.size / 2.0f }, 
+            cur.deg, 
             color
         );
     }

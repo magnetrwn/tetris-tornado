@@ -6,9 +6,9 @@ Game::Game()
     : world(b2Vec2{ 0.0f, 9.8f }),
       wind(),
       warning(SCR_WIDTH, SCR_HEIGHT),
-      cursor(TETROMINO_SIZE, { 192, 216, 255, 127 }),
+      cursor(TETROMINO_SIZE_MIN, TETROMINO_SIZE_MAX, { 192, 216, 255, 127 }),
       storm(SCR_WIDTH, SCR_HEIGHT, 24, 80),
-      score(0), paused(false) {
+      skipLaunchHelp(false), score(0), paused(false) {
 
     initWindow();
     setupFloor();
@@ -31,12 +31,18 @@ Game::~Game() {
 /* --- public --- */
 
 void Game::loop() {
+    int fadeAlpha = 255;
+
     while (!WindowShouldClose()) {
-        if (isShowHelpTime(GetTime() + 1.0f)) {
+
+        if (isShowHelpTime(GetTime())) {
 
             BeginDrawing();
                 drawHelp(255);
             EndDrawing();
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                skipLaunchHelp = true;
 
         } else {
 
@@ -55,8 +61,10 @@ void Game::loop() {
                 else
                     pauseDo();
 
-                if ((HELP_AT_LAUNCH_IVAL - GetTime()) > 0.05f)
-                    drawHelp(255 * (HELP_AT_LAUNCH_IVAL - GetTime()));
+                if (!isShowHelpTime(GetTime())) {
+                    drawHelp(fadeAlpha);
+                    fadeAlpha = std::max(0, fadeAlpha - 8);
+                }
             EndDrawing();
         }
     }
@@ -112,7 +120,7 @@ void Game::step(const float t, const float dt) {
     world.update(dt);
 
     if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
-        cursor.update(GetMousePosition(), 4.8f);
+        cursor.update(GetMousePosition(), MOUSE_SPEED);
     else
         cursor.update(GetMousePosition());
 
@@ -125,10 +133,10 @@ void Game::step(const float t, const float dt) {
             const BodyId id = 
                 world.add(
                     WorldMgr::BodyInit(
-                        info.pos.x, 
-                        info.pos.y, 
-                        TETROMINO_SIZE, 
-                        TETROMINO_SIZE,
+                        info.pos.x,
+                        info.pos.y,
+                        info.size, 
+                        info.size,
                         info.deg
                     ),
                     WorldMgr::BodyType::DYNAMIC,
@@ -140,6 +148,10 @@ void Game::step(const float t, const float dt) {
             awaitingEvaluationTimers.push_back({ id, 0.0f } );
         }
     }
+
+    const float mouseWheel = GetMouseWheelMove();
+    if (mouseWheel != 0.0f)
+        cursor.updateSize(mouseWheel * MOUSE_SPEED);
 
     if (!isPlayerCursorTime(t))
         cursor.updateColor({ 255, 0, 0, 127 });

@@ -22,7 +22,9 @@ private:
     constexpr static float SCR_HEIGHT = 960.0f;
     constexpr static float SCR_W_HALF = static_cast<float>(SCR_WIDTH) / 2.0f;
     constexpr static float SCR_H_HALF = static_cast<float>(SCR_HEIGHT) / 2.0f;
-    constexpr static float TETROMINO_SIZE = 50.0f;
+    constexpr static float MOUSE_SPEED = 4.8f;
+    constexpr static float TETROMINO_SIZE_MIN = 36.0f;
+    constexpr static float TETROMINO_SIZE_MAX = 72.0f;
     constexpr static float WIND_FORCE = 15.0f;
 
     WorldMgr world;
@@ -31,7 +33,7 @@ private:
     PlayerCursor cursor;
     StormView storm;
 
-    constexpr static double HELP_AT_LAUNCH_IVAL = 4.0f;
+    constexpr static double HELP_AT_LAUNCH_IVAL = 5.0f;
     constexpr static double UPDATE_CLOUDS_IVAL = 0.1f;
     constexpr static double NEW_WAVE_IVAL = 7.5f;
     constexpr static double PLAYER_CURSOR_IVAL = 1.0f;
@@ -43,8 +45,9 @@ private:
     double playerCursorTimer;
     std::vector<std::pair<BodyId, double>> awaitingEvaluationTimers;
 
+    bool skipLaunchHelp;
     inline bool isShowHelpTime(const float t) const {
-        return t - helpAtLaunchTimer < HELP_AT_LAUNCH_IVAL;
+        return !skipLaunchHelp and t - helpAtLaunchTimer < HELP_AT_LAUNCH_IVAL;
     }
 
     inline bool isUpdateCloudsTime(const float t) const {
