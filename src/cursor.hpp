@@ -24,6 +24,7 @@ public:
     void set(const TetrId tetrIdx);
     void update(const Vector2& pos, const float degOffset = 0.0f);
     void updateSize(const float sizeOffset);
+    void randomSize();
     void updateColor(const Color color);
     void draw() const;
 

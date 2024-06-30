@@ -16,6 +16,10 @@ void PlayerCursor::updateSize(const float sizeOffset) {
     cur.size = std::fmin(std::fmax(cur.size + sizeOffset, PIECE_MIN), PIECE_MAX);
 }
 
+void PlayerCursor::randomSize() {
+    cur.size = MathUtils::randf(PIECE_MIN, PIECE_MAX);
+}
+
 void PlayerCursor::updateColor(const Color newColor) {
     color = newColor;
 }

@@ -8,7 +8,9 @@ Game::Game()
       warning(SCR_WIDTH, SCR_HEIGHT),
       cursor(TETROMINO_SIZE_MIN, TETROMINO_SIZE_MAX, { 192, 216, 255, 127 }),
       storm(SCR_WIDTH, SCR_HEIGHT, 24, 80),
-      skipLaunchHelp(false), score(0), paused(false) {
+      skipLaunchHelp(false), 
+      upwardsText(font, { SCR_W_HALF, SCR_HEIGHT + FONT_L, 0.0f, -SCR_HEIGHT / 2, 0.5f }),
+      score(0), paused(false) {
 
     initWindow();
     setupFloor();
@@ -120,13 +122,13 @@ void Game::step(const float t, const float dt) {
     world.update(dt);
 
     if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
-        cursor.update(GetMousePosition(), MOUSE_SPEED);
+        cursor.update(GetMousePosition(), SENSITIVITY);
     else
         cursor.update(GetMousePosition());
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) and isPlayerCursorTime(t)) {
         playerCursorTimer = t;
-
+        upwardsText.add("LEFT MOUSE BUTTON", FONT_M, WHITE);
         const PlayerCursor::CursorInfo info = cursor.get();
 
         if (info.tetrIdx != -1) {
@@ -145,13 +147,14 @@ void Game::step(const float t, const float dt) {
                 );
 
             cursor.set(MathUtils::randi(0, Tetromino::TETROMINO_COUNT - 1));
+            cursor.randomSize();
             awaitingEvaluationTimers.push_back({ id, 0.0f } );
         }
     }
 
     const float mouseWheel = GetMouseWheelMove();
     if (mouseWheel != 0.0f)
-        cursor.updateSize(mouseWheel * MOUSE_SPEED);
+        cursor.updateSize(mouseWheel * SENSITIVITY);
 
     if (!isPlayerCursorTime(t))
         cursor.updateColor({ 255, 0, 0, 127 });
@@ -207,6 +210,7 @@ void Game::step(const float t, const float dt) {
     wind.step(dt);
     warning.step(dt);
     storm.updateDroplets(dt, wind.getWind());
+    upwardsText.step(dt);
 }
 
 void Game::draw() const {
@@ -215,6 +219,7 @@ void Game::draw() const {
     cursor.draw();
     storm.draw();
     warning.draw();
+    upwardsText.draw();
 
     const float w = wind.getWind();
 
@@ -253,26 +258,31 @@ void Game::draw() const {
 }
 
 void Game::drawHelp(const unsigned char alpha) const {
-    DrawRectangle( 0, 0, SCR_WIDTH, SCR_HEIGHT, { 0, 0, 0, alpha });
+    using AlignedYStr = std::pair<const char*, float>;
 
-    constexpr static const char* HELP_STRINGS[6] = {
-        "LMB: place tetromino,",
-        "RMB: rotate tetromino,",
-        "P: pause game,",
-        "The game is endless!",
-        "Your score:",
-        "0"
+    constexpr static float TOP_TEXT_OFFSET = 90.0f;
+    constexpr static std::array<AlignedYStr, 6> HELP_STRINGS = {
+        AlignedYStr{ "-- Controls: --", TOP_TEXT_OFFSET },
+        AlignedYStr{ "LMB >> place,", TOP_TEXT_OFFSET + FONT_S * 2.0f },
+        AlignedYStr{ "RMB >> rotate,", TOP_TEXT_OFFSET + FONT_S * 3.5f },
+        AlignedYStr{ "Mouse wheel >> resize,", TOP_TEXT_OFFSET + FONT_S * 5.0f },
+        AlignedYStr{ "P >> pause game,", TOP_TEXT_OFFSET + FONT_S * 6.5f },
+        AlignedYStr{ "The game is endless!", SCR_H_HALF + FONT_S * 2.0f },
     };
 
-    for (size_t i = 0; i < 4; ++i)
-        drawCenteredText(HELP_STRINGS[i], SCR_H_HALF - HELP_TEXT_INTERLINE * 1.5f + HELP_TEXT_INTERLINE * i, FONT_S, 2, { 255, 255, 255, alpha });
+    DrawRectangle( 0, 0, SCR_WIDTH, SCR_HEIGHT, { 0, 0, 0, alpha });
 
-    DrawTextEx(font, HELP_STRINGS[4], { SCR_W_HALF - 220, SCR_HEIGHT - 95 }, FONT_S, 2, { 255, 255, 255, alpha });
-    drawCenteredText(HELP_STRINGS[5], SCR_HEIGHT - 100, FONT_M, 4, { 255, 255, 255, alpha });
+    for (const std::pair<const char*, float>& str : HELP_STRINGS)
+        drawCenteredText(str.first, str.second, FONT_S, 2, { 255, 255, 255, alpha });
+
+    drawCenteredText("Get Ready!", SCR_H_HALF - FONT_L / 2.0f, FONT_L, 4, { 255, 255, 255, alpha });
+    DrawTextEx(font, "Your score:", { SCR_W_HALF - 220, SCR_HEIGHT - 95 }, FONT_S, 2, { 255, 255, 255, alpha });
+    drawCenteredText("0", SCR_HEIGHT - 100, FONT_M, 4, { 255, 255, 255, alpha });
+    DrawTextEx(font, "LMB to skip", { SCR_WIDTH - 200, SCR_HEIGHT - 50 }, FONT_S, 2, { 255, 255, 255, alpha });
 }
 
 void Game::pauseDo() {
     storm.updateDroplets(GetFrameTime(), wind.getWind());
     draw();
-    drawCenteredText("PAUSED", SCR_H_HALF - 32, FONT_L, 4, WHITE);
+    drawCenteredText("PAUSED", SCR_H_HALF - FONT_L / 2.0f, FONT_L, 4, WHITE);
 }

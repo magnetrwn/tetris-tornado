@@ -2,11 +2,13 @@
 #define GAME_H_
 
 #include <string>
+#include <array>
 #include "world.hpp"
 #include "storm.hpp"
 #include "wind.hpp"
 #include "warning.hpp"
 #include "cursor.hpp"
+#include "text.hpp"
 
 class Game {
 public:
@@ -22,7 +24,7 @@ private:
     constexpr static float SCR_HEIGHT = 960.0f;
     constexpr static float SCR_W_HALF = static_cast<float>(SCR_WIDTH) / 2.0f;
     constexpr static float SCR_H_HALF = static_cast<float>(SCR_HEIGHT) / 2.0f;
-    constexpr static float MOUSE_SPEED = 4.8f;
+    constexpr static float SENSITIVITY = 4.8f;
     constexpr static float TETROMINO_SIZE_MIN = 36.0f;
     constexpr static float TETROMINO_SIZE_MAX = 72.0f;
     constexpr static float WIND_FORCE = 15.0f;
@@ -75,6 +77,7 @@ private:
     constexpr static size_t FONT_S = 32;
 
     Font font;
+    MovingTextMgr upwardsText;
 
     void drawCenteredText(const char* text, const float y, const size_t size, const size_t spacing, const Color color) const;
 
@@ -86,8 +89,6 @@ private:
 
     void step(const float t, const float dt);
     void draw() const;
-
-    constexpr static float HELP_TEXT_INTERLINE = 120.0f;
 
     void drawHelp(const unsigned char alpha) const;
     void pauseDo();
